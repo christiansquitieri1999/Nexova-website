@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexova | Application Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#f3f8ff',
+                100: '#e0edff',
+                500: '#3b82f6',
+                600: '#1d4ed8',
+                700: '#1e3a8a',
+                900: '#0f172a'
+              }
+            }
+          }
+        }
+      };
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <main class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+      <div class="mb-8 flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-3" aria-label="Back to Nexova home">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white" aria-hidden="true">
+            <svg viewBox="0 0 64 64" class="h-7 w-7" role="img" aria-label="Nexova logo">
+              <rect x="6" y="6" width="52" height="52" rx="16" fill="currentColor" opacity="0.12"/>
+              <path d="M17 44V20h7l8 15 8-15h7v24h-6V28l-9 16h-2l-9-16v16h-6Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div>
+            <p class="text-xl font-black text-slate-900">Nexova</p>
+            <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">People & Talent</p>
+          </div>
+        </a>
+      </div>
+
+      <section class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-soft sm:p-8 lg:p-10">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">Application</p>
+        <h1 class="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Join the Nexova network</h1>
+        <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+          Tell us about your background and what kind of opportunity you are looking for. We will review your application and get in touch with the next steps.
+        </p>
+
+        <form class="mt-8 space-y-6" action="#" method="post">
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="first-name" class="mb-2 block text-sm font-semibold text-slate-700">First name</label>
+              <input id="first-name" name="first-name" type="text" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Your first name" />
+            </div>
+            <div>
+              <label for="last-name" class="mb-2 block text-sm font-semibold text-slate-700">Last name</label>
+              <input id="last-name" name="last-name" type="text" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Your last name" />
+            </div>
+          </div>
+
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label for="email" class="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+              <input id="email" name="email" type="email" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label for="phone" class="mb-2 block text-sm font-semibold text-slate-700">Phone</label>
+              <input id="phone" name="phone" type="tel" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="+1 (555) 123-4567" />
+            </div>
+          </div>
+
+          <div>
+            <label for="role" class="mb-2 block text-sm font-semibold text-slate-700">Role interest</label>
+            <input id="role" name="role" type="text" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="e.g. Product Designer, Marketing Manager" />
+          </div>
+
+          <div>
+            <label for="message" class="mb-2 block text-sm font-semibold text-slate-700">Tell us about yourself</label>
+            <textarea id="message" name="message" rows="5" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100" placeholder="Share your experience, strengths, and what kind of role you are looking for."></textarea>
+          </div>
+
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <button type="submit" class="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700">
+              Submit application
+            </button>
+            <a href="index.html" class="text-sm font-semibold text-brand-600 transition hover:text-brand-700">Back to home</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

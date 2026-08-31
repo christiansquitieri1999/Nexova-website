@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Nexova is a human-centered recruiting partner helping companies hire with clarity, care, and stronger people-fit decisions."
+    />
+    <title>Nexova | Human-Centered Hiring</title>
+    <meta name="theme-color" content="#edf4ff" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#f3f8ff',
+                100: '#e0edff',
+                500: '#3b82f6',
+                600: '#1d4ed8',
+                700: '#1e3a8a',
+                900: '#0f172a'
+              },
+              ink: '#0f1f3d'
+            },
+            boxShadow: {
+              soft: '0 20px 45px -20px rgba(30, 64, 175, 0.35)'
+            }
+          }
+        }
+      };
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Nexova",
+        "alternateName": "Nexova People & Talent",
+        "description": "Human-centered recruiting and talent advisory services focused on meaningful hiring decisions.",
+        "url": "https://www.nexova.com",
+        "logo": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+        "industry": "Human Resources",
+        "employmentType": ["Full-time", "Contract", "Temporary"],
+        "areaServed": "Worldwide",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "48 Market Street, Suite 300",
+          "addressLocality": "New York",
+          "addressRegion": "NY",
+          "postalCode": "10013",
+          "addressCountry": "US"
+        },
+        "email": "hello@nexova.com",
+        "telephone": "+1-555-0199",
+        "sameAs": []
+      }
+    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: 'Manrope', 'Segoe UI', sans-serif;
+        background: #edf4ff;
+      }
+
+      .brand-wordmark {
+        letter-spacing: -0.06em;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <header class="sticky top-0 z-50 bg-white/90 shadow-sm ring-1 ring-slate-200/80 backdrop-blur-sm">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <a href="#top" class="flex items-center gap-3" aria-label="Nexova home">
+          <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white shadow-soft" aria-hidden="true">
+            <span class="text-lg font-extrabold tracking-[-0.08em]">N</span>
+          </div>
+          <div class="leading-none">
+            <p class="brand-wordmark text-[2rem] font-extrabold tracking-[-0.07em] text-ink">Nexova</p>
+            <p class="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">People &amp; Talent</p>
+          </div>
+        </a>
+
+        <nav class="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex" aria-label="Main navigation">
+          <a href="#why-nexova" class="transition hover:text-brand-600">Why Nexova</a>
+          <a href="#services" class="transition hover:text-brand-600">Services</a>
+          <a href="#experience" class="transition hover:text-brand-600">Experience</a>
+          <a href="#contact" class="transition hover:text-brand-600">Contact</a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <a
+            href="application.html"
+            class="inline-flex rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700"
+            aria-label="Apply to Nexova"
+          >
+            Apply now
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="relative overflow-hidden bg-[#edf4ff]">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(17,24,39,0.03),transparent_30%)]" aria-hidden="true"></div>
+        <div class="relative mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.12fr_0.88fr] lg:px-8 lg:py-20">
+          <div class="flex flex-col justify-center">
+            <h1 class="max-w-[12ch] text-[clamp(3.2rem,5vw,8rem)] font-extrabold leading-[0.88] tracking-[-0.08em] text-[#101b32]">
+              We put human skills and human beings at the center of every interview.
+            </h1>
+
+            <p class="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              Nexova delivers HR recruiting services that help companies find the right people through better conversations, stronger alignment, and more thoughtful hiring decisions.
+            </p>
+
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+              <a
+                href="application.html"
+                class="inline-flex items-center justify-center rounded-full bg-brand-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-brand-600/20 transition hover:bg-brand-700"
+                aria-label="Apply to Nexova"
+              >
+                Apply now
+              </a>
+              <a
+                href="#services"
+                class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-700 transition hover:border-brand-200 hover:text-brand-600"
+                aria-label="Explore Nexova services"
+              >
+                Explore services
+              </a>
+            </div>
+
+            <dl class="mt-10 grid grid-cols-3 gap-4 sm:gap-6">
+              <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+                <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Hiring time</dt>
+                <dd class="mt-2 text-2xl font-black text-slate-900">2–6 wks</dd>
+              </div>
+              <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+                <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">People placed</dt>
+                <dd class="mt-2 text-2xl font-black text-slate-900">1.2k+</dd>
+              </div>
+              <div class="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
+                <dt class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Retention</dt>
+                <dd class="mt-2 text-2xl font-black text-slate-900">92%</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="flex items-center justify-center">
+            <div class="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-soft">
+              <img
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80"
+                alt="Recruitment team discussing candidates in a modern office environment"
+                class="h-[540px] w-full rounded-[1.5rem] object-cover"
+              />
+              <div class="absolute inset-x-6 bottom-6 rounded-2xl border border-white/30 bg-slate-900/70 p-4 text-white backdrop-blur-sm">
+                <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-100">Talent intelligence</p>
+                <p class="mt-2 text-2xl font-extrabold leading-tight">Better hiring decisions, built on people.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="why-nexova" class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20" aria-labelledby="why-title">
+        <div class="mb-10 max-w-2xl">
+          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">Why Nexova</p>
+          <h2 id="why-title" class="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            We make hiring feel clearer, warmer, and more effective.
+          </h2>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-3">
+          <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-soft" aria-label="Benefit 1: Better talent match">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
+              <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current" role="img" aria-label="Match icon">
+                <path d="M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2Zm0 2.25A7.75 7.75 0 0 1 19.75 12 7.71 7.71 0 0 1 12 19.75 7.75 7.75 0 1 1 12 4.25Zm0 2.5A5.25 5.25 0 1 0 17.25 12 5.26 5.26 0 0 0 12 6.75Zm0 2.5a2.75 2.75 0 1 1-2.75 2.75A2.75 2.75 0 0 1 12 9.25Z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Better talent match</h3>
+            <p class="mt-3 text-base leading-7 text-slate-600">
+              We match people based on skills, potential, motivation, and team context—not just résumé keywords.
+            </p>
+          </article>
+
+          <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-soft" aria-label="Benefit 2: Respectful candidate experience">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+              <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current" role="img" aria-label="Respect icon">
+                <path d="M12 20.25a1.06 1.06 0 0 1-.75-.31l-6.59-6.12A4.72 4.72 0 0 1 5.3 4.75a4.49 4.49 0 0 1 6.7 0L12 5.67l.01-.02 0-.01a4.49 4.49 0 0 1 6.7 0 4.72 4.72 0 0 1 0 8.88l-6.6 6.11a1.06 1.06 0 0 1-.75.31Z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Respectful candidate experience</h3>
+            <p class="mt-3 text-base leading-7 text-slate-600">
+              Candidates feel informed, valued, and heard throughout the process, which strengthens your employer brand.
+            </p>
+          </article>
+
+          <article class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-soft" aria-label="Benefit 3: Faster decisions">
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
+              <svg viewBox="0 0 24 24" class="h-6 w-6 fill-current" role="img" aria-label="Growth icon">
+                <path d="M4 17.5V15h2v2.5h8.75V15h2v2.5H20V20h-2v-1.25H6.75V20H4v-2.5Zm2.25-6.75h2.5v5.5h-2.5v-5.5Zm5.5-4h2.5v9.5h-2.5v-9.5Zm5.5-2h2.5v11.5h-2.5V4.75Z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Faster, clearer decisions</h3>
+            <p class="mt-3 text-base leading-7 text-slate-600">
+              Structured interviews reduce friction, speed up alignment, and help teams move with confidence.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="services" class="bg-slate-900 text-white" aria-labelledby="services-title">
+        <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+          <div class="mb-10 max-w-2xl">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-100">Core services</p>
+            <h2 id="services-title" class="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Three strengths. One human-centered hiring experience.
+            </h2>
+          </div>
+
+          <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div class="overflow-hidden rounded-[2rem] ring-1 ring-slate-700">
+              <img
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=80"
+                alt="Business team reviewing hiring strategy in a collaborative meeting"
+                class="h-[480px] w-full object-cover"
+              />
+            </div>
+
+            <div class="space-y-5">
+              <div class="flex items-start gap-4 rounded-2xl border border-slate-700 bg-slate-800/60 p-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-base font-bold text-brand-100">01</div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Skills-first screening</h3>
+                  <p class="mt-2 text-base leading-7 text-slate-300">
+                    We look beyond the résumé to assess the competencies, context, and practical strengths that truly drive performance.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 rounded-2xl border border-slate-700 bg-slate-800/60 p-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-base font-bold text-amber-200">02</div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Structured interviews</h3>
+                  <p class="mt-2 text-base leading-7 text-slate-300">
+                    We design conversations that are fair, respectful, and focused on real potential—so both candidates and teams feel confident.
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-4 rounded-2xl border border-slate-700 bg-slate-800/60 p-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-base font-bold text-emerald-200">03</div>
+                <div>
+                  <h3 class="text-xl font-bold text-white">Talent advisory</h3>
+                  <p class="mt-2 text-base leading-7 text-slate-300">
+                    We advise on employer positioning, process clarity, and decision support so your hiring strategy becomes stronger over time.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="experience" class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20" aria-labelledby="experience-title">
+        <div class="mb-8 max-w-2xl">
+          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-600">Real experiences</p>
+          <h2 id="experience-title" class="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            Stories that show why people and companies trust Nexova.
+          </h2>
+        </div>
+
+        <div class="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+          <div class="space-y-6">
+            <article class="border-b border-slate-200 pb-6" aria-label="Candidate story">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-brand-600">Candidate story</p>
+              <blockquote class="mt-3 text-xl font-medium leading-8 text-slate-800 sm:text-2xl">
+                “I had gone through a lot of interviews before Nexova. They made me feel seen, explained the process clearly, and helped me understand the role in a way that felt honest and human.”
+              </blockquote>
+              <p class="mt-4 text-base font-semibold text-slate-900">Maria L. — Product Designer</p>
+            </article>
+
+            <article aria-label="Client story">
+              <p class="text-sm font-semibold uppercase tracking-[0.18em] text-brand-600">Client story</p>
+              <blockquote class="mt-3 text-xl font-medium leading-8 text-slate-800 sm:text-2xl">
+                “We needed a hiring partner who could understand both our culture and the people behind the profiles. Nexova brought clarity, speed, and a process that respected everyone involved.”
+              </blockquote>
+              <p class="mt-4 text-base font-semibold text-slate-900">Daniel R. — People Lead, ScaleLab</p>
+            </article>
+          </div>
+
+          <div class="overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-2 shadow-soft">
+            <img
+              src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=80"
+              alt="Candidate smiling while speaking with a recruiter during a professional interview"
+              class="h-[520px] w-full rounded-[1.5rem] object-cover"
+            />
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contact" class="bg-slate-950 text-slate-200" aria-label="Contact information">
+      <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <div class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 text-white" aria-hidden="true">
+                <svg viewBox="0 0 64 64" class="h-7 w-7 fill-current" role="img" aria-label="Nexova logo">
+                  <path d="M17 44V20h7l8 15 8-15h7v24h-6V28l-9 16h-2l-9-16v16h-6Z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-xl font-black text-white">Nexova</p>
+                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">People & Talent</p>
+              </div>
+            </div>
+            <p class="mt-5 max-w-lg text-base leading-7 text-slate-300">
+              Human-centered recruitment services designed to create better hiring experiences for companies and candidates alike.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">Contact</h3>
+            <ul class="mt-4 space-y-3 text-base text-slate-200">
+              <li><a href="mailto:hello@nexova.com" class="transition hover:text-white">hello@nexova.com</a></li>
+              <li><a href="tel:+15550199" class="transition hover:text-white">+1 (555) 0199</a></li>
+              <li>48 Market Street, Suite 300<br />New York, NY 10013</li>
+              <li><a href="application.html" class="inline-flex rounded-full bg-white px-4 py-2 font-semibold text-slate-900 transition hover:bg-slate-200">Apply now</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-10 border-t border-slate-800 pt-6 text-sm text-slate-400">
+          © 2026 Nexova. All rights reserved.
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
