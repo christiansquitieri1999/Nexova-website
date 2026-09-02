@@ -33,3 +33,13 @@ Since you already write code into validation.js, implement real time validation 
 ##7
 
 add a button to clear the form. Implement responsive form design and tailwind spaing, sizes e focus states
+
+##8 (ask mode)
+
+Final checks to written code. Assess if appropriate semantic tags are used and preferred instead of generic <div>s; check if schema.orga markup is present and correclty implemented and so document structure is logical and hierarchical
+
+##9 (ask mode)
+The accessibility is verified and satisfied? All interactive elemtns are keyboard accesuble, AIRA attributes are used to improve accessability, color constrast meets minimum standard, navigation is logical and predictable. Error message are announced properly not only for invalid data type input in form
+
+##10 (ask mode)
+Check form and validation all fields in context.md are present and matche those requirred in context.md, please align tone and contest to be consistent with an established company going digital. The contest must represent company's expereicen and competitive advanteges since the sectore specified in context.md. Finally verify form visual states are clear javascripts correctly validate all fields and error message are specific and helpful not just invalid "field"

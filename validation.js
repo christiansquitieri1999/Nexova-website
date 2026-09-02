@@ -17,7 +17,7 @@ if (form) {
 	const commentsCounter = document.querySelector('#comments-counter');
 	const successMessage = document.querySelector('#success-message');
 	const clearButton = document.querySelector('#clear-form');
-	const errorClasses = ['border-red-500', 'bg-red-50', 'focus:border-red-500', 'focus:ring-red-100'];
+	const errorClasses = ['border-red-600', 'bg-red-50', 'focus:border-red-700', 'focus:ring-red-700/30'];
 	const validClasses = ['border-green-500', 'bg-green-50', 'focus:border-green-500', 'focus:ring-green-100'];
 	const touchedFields = new Set();
 
