@@ -14,7 +14,7 @@ _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 This repository is the **starter template** for transversal projects. You will work on real company scenarios (Brasaland, TrackFlow, Nexova), building deliverables that map to course milestones (Web, Programming, Backend, Telemetry, RAG, Agents, Workflows, Real-time).
 
 - Create a template from this repository.
-- Replace the placeholder `CONTEXT.md` with your assigned company context.
+- Use `contexts/` to find the brief for each project milestone.
 - Use `skills/` and the directory-level `README.md` files as working guidance.
 
 ---
@@ -23,7 +23,7 @@ This repository is the **starter template** for transversal projects. You will w
 
 1. **Use this repository as a template** and create your own project repo.
 2. **Clone** your repository (or open it in Codespaces).
-3. **Replace** `CONTEXT.md` with the full context for your assigned company.
+3. **Open** the relevant brief under `contexts/` before starting a milestone.
 4. **Read this folder guide** and open the `README.md` of the folder you are working in.
 5. **Start implementing** in the right folder — do not dump everything in the root.
 6. **Document** what you add: each new app, service, agent, or pipeline gets a subfolder + README.
@@ -36,7 +36,7 @@ You are building **one company** across many milestones and projects. Each top-l
 
 | Layer               | Folders                           | What lives here                                                  |
 | ------------------- | --------------------------------- | ---------------------------------------------------------------- |
-| **Company context** | `CONTEXT.md`                      | Domain facts, field names, constraints for your assigned company |
+| **Milestone briefs** | `contexts/`                       | Requirements and domain details, organized by project milestone  |
 | **User-facing**     | `uis/`, `services/`               | Frontends and backends users (or operators) interact with        |
 | **Data**            | `data/`                           | Raw files, pipelines, processed datasets, evaluation sets        |
 | **AI**              | `agents/`, `skills/`, `mcps/`     | Agents, reusable agent capabilities, MCP tool servers            |
@@ -53,7 +53,7 @@ You are building **one company** across many milestones and projects. Each top-l
 
 > 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
 >
-> - `CONTEXT.md` is a placeholder and must be replaced with your assigned company context.
+> - `contexts/` contains the project briefs, organized by milestone.
 > - There is no root `AGENTS.md` yet.
 > - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
 
@@ -67,7 +67,7 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 | Path                         | Purpose                                                                   | What you do here                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`CONTEXT.md`](./CONTEXT.md) | Single source of truth for your company (Brasaland, TrackFlow, or Nexova) | **First step:** copy your assigned company briefing here so every app, agent, and prompt uses the same domain |
+| [`contexts/`](./contexts/README.md) | Milestone-specific project briefs | **First step:** read the brief for the milestone you are building |
 | `docker-compose.yml`         | Local dev orchestration for the whole stack                               | Keep at repo root — wires `services/`, databases, and other containers from one place                         |
 | `README.md` / `README.es.md` | This guide                                                                | Orientation — you are here                                                                                    |
 
@@ -269,7 +269,9 @@ Is it a CLI tool with its own package?     → internal/
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # This guide
-├── CONTEXT.md                 # ← Replace with your company briefing
+├── contexts/                  # ← Briefs organized by milestone
+│   ├── 01-public-website/
+│   └── 02-programming-fundamentals/
 ├── docker-compose.yml         # ← Local dev orchestration (repo root)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # Centralized FastAPI company API

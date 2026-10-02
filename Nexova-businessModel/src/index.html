@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="it">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f5f7f2">
+	<title>Nexova | Business Model Test Bench</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+	<script>
+		tailwind.config = {
+			theme: {
+				extend: {
+					fontFamily: {
+						sans: ["DM Sans", "sans-serif"],
+						display: ["Space Grotesk", "sans-serif"],
+						mono: ["DM Mono", "monospace"],
+					},
+					colors: {
+						ink: "#1d2925",
+						forest: "#176b52",
+						lime: "#d9f36a",
+						paper: "#f5f7f2",
+						line: "#dce3dc",
+					},
+				},
+			},
+		};
+	</script>
+	<style>
+		:root { color-scheme: light; }
+		body { background: #f5f7f2; color: #1d2925; }
+		.grid-paper { background-image: linear-gradient(#e8ede6 1px, transparent 1px), linear-gradient(90deg, #e8ede6 1px, transparent 1px); background-size: 28px 28px; }
+		.tab-button[aria-selected="true"] { color: #176b52; border-color: #176b52; background: #e9f3ed; }
+		.tab-button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #c7e767; outline-offset: 2px; }
+		.result-row { animation: rise-in .22s ease-out both; }
+		@keyframes rise-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+		@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+	</style>
+</head>
+<body class="min-h-screen font-sans antialiased">
+	<header class="border-b border-line bg-white">
+		<div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
+			<a href="#main" class="flex items-center gap-3 text-ink no-underline" aria-label="Nexova, test bench home">
+				<span class="grid h-9 w-9 place-items-center rounded-md bg-forest font-display text-lg font-bold text-white">N</span>
+				<span class="font-display text-lg font-bold">Nexova<span class="ml-2 font-sans text-xs font-medium uppercase tracking-widest text-forest">Engineering</span></span>
+			</a>
+			<div class="flex items-center gap-2 font-mono text-xs text-slate-500">
+				<span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+				<span>LOCAL TEST BENCH</span>
+			</div>
+		</div>
+	</header>
+
+	<main id="main" class="mx-auto max-w-7xl px-5 py-8 lg:px-8 lg:py-10">
+		<div class="grid-paper mb-8 flex flex-col justify-between gap-5 rounded-md border border-line px-6 py-6 sm:flex-row sm:items-end">
+			<div>
+				<p class="mb-2 font-mono text-xs font-medium uppercase tracking-widest text-forest">Milestone 02 / Programming Fundamentals</p>
+				<h1 class="font-display text-3xl font-bold tracking-normal sm:text-4xl">Candidate operations</h1>
+				<p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Prova filtri, ricerche, ordinamenti e report sul dataset dimostrativo Nexova.</p>
+			</div>
+			<div class="flex shrink-0 items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-xs text-slate-600">
+				<span class="font-mono text-sm font-medium text-ink" id="dataset-count">3</span>
+				<span>candidati campione</span>
+			</div>
+		</div>
+
+		<div class="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+			<aside class="space-y-6" aria-label="Selezione operazione">
+				<div>
+					<h2 class="mb-3 font-display text-sm font-bold uppercase tracking-wider text-slate-500">Operazioni</h2>
+					<div class="grid grid-cols-2 gap-2 lg:grid-cols-1" role="tablist" aria-label="Operazioni candidati">
+						<button class="tab-button rounded-md border border-line bg-white px-4 py-3 text-left text-sm font-semibold transition hover:border-forest" id="tab-filter" role="tab" aria-selected="true" aria-controls="panel-filter" data-tab="filter">Filtra candidati</button>
+						<button class="tab-button rounded-md border border-line bg-white px-4 py-3 text-left text-sm font-semibold transition hover:border-forest" id="tab-search" role="tab" aria-selected="false" aria-controls="panel-search" data-tab="search">Cerca candidato</button>
+						<button class="tab-button rounded-md border border-line bg-white px-4 py-3 text-left text-sm font-semibold transition hover:border-forest" id="tab-sort" role="tab" aria-selected="false" aria-controls="panel-sort" data-tab="sort">Ordina risultati</button>
+						<button class="tab-button rounded-md border border-line bg-white px-4 py-3 text-left text-sm font-semibold transition hover:border-forest" id="tab-report" role="tab" aria-selected="false" aria-controls="panel-report" data-tab="report">Genera report</button>
+					</div>
+				</div>
+
+				<section id="panel-filter" class="operation-panel border-t border-line pt-5" role="tabpanel" aria-labelledby="tab-filter" data-panel="filter">
+					<h2 class="font-display text-lg font-bold">Criteri filtro</h2>
+					<p class="mb-4 mt-1 text-xs leading-5 text-slate-500">I criteri compilati vengono combinati insieme.</p>
+					<form id="filter-form" class="space-y-4">
+						<label class="block text-sm font-semibold">Skill richieste
+							<input id="filter-skills" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal" placeholder="TypeScript, React" autocomplete="off">
+							<span class="mt-1 block text-xs font-normal text-slate-500">Separale con una virgola; devono esserci tutte.</span>
+						</label>
+						<label class="block text-sm font-semibold">Seniorità
+							<select id="filter-seniority" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal">
+								<option value="">Qualsiasi</option><option>Junior</option><option>Semi-Senior</option><option>Senior</option><option>Lead</option><option>Executive</option>
+							</select>
+						</label>
+						<label class="block text-sm font-semibold">Disponibilità
+							<select id="filter-availability" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal">
+								<option value="">Qualsiasi</option><option>Immediate</option><option>2 weeks</option><option>1 month</option><option>Not available</option>
+							</select>
+						</label>
+						<fieldset>
+							<legend class="mb-2 text-sm font-semibold">Salario atteso (USD)</legend>
+							<div class="grid grid-cols-2 gap-2">
+								<label class="sr-only" for="filter-salary-min">Salario minimo</label>
+								<input id="filter-salary-min" type="number" min="0" class="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm" placeholder="Min">
+								<label class="sr-only" for="filter-salary-max">Salario massimo</label>
+								<input id="filter-salary-max" type="number" min="0" class="w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm" placeholder="Max">
+							</div>
+						</fieldset>
+						<label class="block text-sm font-semibold">Stato
+							<select id="filter-status" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal">
+								<option value="">Qualsiasi</option><option>Active</option><option>In process</option><option>Hired</option><option>Inactive</option>
+							</select>
+						</label>
+						<div class="flex gap-2 pt-1">
+							<button class="flex-1 rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink" type="submit">Applica filtri</button>
+							<button class="rounded-md border border-line bg-white px-3 py-2.5 text-sm font-semibold hover:border-forest" type="reset" title="Azzera criteri">Azzera</button>
+						</div>
+					</form>
+				</section>
+
+				<section id="panel-search" class="operation-panel hidden border-t border-line pt-5" role="tabpanel" aria-labelledby="tab-search" data-panel="search" hidden>
+					<h2 class="font-display text-lg font-bold">Ricerca</h2>
+					<p class="mb-4 mt-1 text-xs leading-5 text-slate-500">ID ed email usano ricerca lineare; il salario usa ricerca binaria su dati ordinati.</p>
+					<form id="search-form" class="space-y-4">
+						<label class="block text-sm font-semibold">Campo di ricerca
+							<select id="search-type" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal">
+								<option value="id">ID candidato</option><option value="email">Email</option><option value="salary">Salario atteso (USD)</option>
+							</select>
+						</label>
+						<label class="block text-sm font-semibold" for="search-query">Valore
+							<input id="search-query" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal" placeholder="Es. C-2024-0451" required>
+						</label>
+						<button class="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink" type="submit">Cerca</button>
+					</form>
+					<div id="search-note" class="mt-4 min-h-10 text-sm text-slate-600" aria-live="polite"></div>
+				</section>
+
+				<section id="panel-sort" class="operation-panel hidden border-t border-line pt-5" role="tabpanel" aria-labelledby="tab-sort" data-panel="sort" hidden>
+					<h2 class="font-display text-lg font-bold">Ordinamento</h2>
+					<p class="mb-4 mt-1 text-xs leading-5 text-slate-500">Il risultato è una copia ordinata; il dataset originale resta invariato.</p>
+					<form id="sort-form" class="space-y-4">
+						<label class="block text-sm font-semibold">Ordina per
+							<select id="sort-field" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal"><option value="salary">Salario atteso</option><option value="experience">Esperienza</option></select>
+						</label>
+						<label class="block text-sm font-semibold">Direzione
+							<select id="sort-order" class="mt-1.5 block w-full rounded-md border border-line bg-white px-3 py-2.5 text-sm font-normal"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select>
+						</label>
+						<button class="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink" type="submit">Ordina candidati</button>
+					</form>
+					<div id="sort-note" class="mt-4 min-h-10 text-sm text-slate-600" aria-live="polite"></div>
+				</section>
+
+				<section id="panel-report" class="operation-panel hidden border-t border-line pt-5" role="tabpanel" aria-labelledby="tab-report" data-panel="report" hidden>
+					<h2 class="font-display text-lg font-bold">Report selezione</h2>
+					<p class="mb-4 mt-1 text-xs leading-5 text-slate-500">Aggregazioni calcolate sul dataset campione completo.</p>
+					<button id="generate-report" class="w-full rounded-md bg-forest px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink" type="button">Genera report</button>
+				</section>
+			</aside>
+
+			<section class="min-w-0" aria-label="Risultati operazioni">
+				<div class="mb-4 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
+					<div>
+						<p class="font-mono text-[11px] uppercase tracking-widest text-slate-500" id="result-kicker">DATASET / CANDIDATES</p>
+						<h2 class="mt-1 font-display text-2xl font-bold" id="result-title">Candidati</h2>
+					</div>
+					<span id="result-count" class="font-mono text-xs text-slate-500" aria-live="polite">3 risultati</span>
+				</div>
+
+				<div id="candidate-results" class="overflow-hidden rounded-md border border-line bg-white">
+					<div class="hidden grid-cols-[minmax(150px,1.3fr)_minmax(120px,1fr)_minmax(100px,.8fr)_minmax(110px,.8fr)_minmax(90px,.6fr)] gap-3 border-b border-line bg-[#eef2eb] px-4 py-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 sm:grid">
+						<span>Candidato</span><span>Seniorità</span><span>Esperienza</span><span>Salario atteso</span><span>Stato</span>
+					</div>
+					<div id="candidate-list" aria-live="polite"></div>
+				</div>
+
+				<section id="report-results" class="mt-8 hidden" aria-live="polite">
+					<div class="mb-4 border-b border-line pb-3">
+						<p class="font-mono text-[11px] uppercase tracking-widest text-slate-500">REPORT / AGGREGATES</p>
+						<h2 class="mt-1 font-display text-xl font-bold">Metriche del dataset</h2>
+					</div>
+					<div id="report-metrics" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"></div>
+					<div class="mt-8 grid gap-8 xl:grid-cols-2">
+						<section>
+							<h3 class="mb-3 font-display text-base font-bold">Candidati per stato</h3>
+							<div id="status-report" class="divide-y divide-line border-y border-line bg-white"></div>
+						</section>
+						<section>
+							<h3 class="mb-3 font-display text-base font-bold">Skill più frequenti</h3>
+							<div id="skill-report" class="divide-y divide-line border-y border-line bg-white"></div>
+						</section>
+					</div>
+					<section class="mt-8">
+						<div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+							<h3 class="font-display text-base font-bold">Ranking per la vacancy campione</h3>
+							<span class="text-xs text-slate-500">Senior Full-Stack Developer / TechCorp Solutions</span>
+						</div>
+						<div id="ranking-report" class="divide-y divide-line border-y border-line bg-white"></div>
+					</section>
+				</section>
+			</section>
+		</div>
+		<footer class="mt-12 border-t border-line py-5 text-xs text-slate-500">
+			Dati dimostrativi Nexova · USD · funzioni di esempio secondo il context del Milestone 2
+		</footer>
+	</main>
+
+	<script>
+		"use strict";
+
+		const candidates = [
+			{
+				id: "C-2024-0451", fullName: "María González", email: "maria.gonzalez@email.com", phone: "+56912345678",
+				yearsOfExperience: 5, skills: ["TypeScript", "React", "Node.js", "PostgreSQL"], englishLevel: "B2",
+				seniority: "Semi-Senior", currentSalary: 3500, expectedSalary: 4200, availability: "1 month",
+				location: "Valencia, Spain", remoteOnly: false, status: "Active",
+			},
+			{
+				id: "C-2024-0452", fullName: "Juan Pérez", email: "juan.perez@email.com", phone: "+56987654321",
+				yearsOfExperience: 3, skills: ["JavaScript", "React", "CSS", "HTML"], englishLevel: "B1",
+				seniority: "Junior", currentSalary: 2200, expectedSalary: 2800, availability: "Immediate",
+				location: "Miami, Florida, United States", remoteOnly: true, status: "Active",
+			},
+			{
+				id: "C-2024-0453", fullName: "Carolina Silva", email: "carolina.silva@email.com", phone: "+56911223344",
+				yearsOfExperience: 8, skills: ["TypeScript", "Node.js", "PostgreSQL", "Docker", "AWS"], englishLevel: "C1",
+				seniority: "Senior", currentSalary: 5500, expectedSalary: 6500, availability: "2 weeks",
+				location: "Valencia, Spain", remoteOnly: false, status: "Active",
+			},
+		];
+
+		const selectionProcesses = [
+			{ id: "SP-2024-1001", candidateId: "C-2024-0451", vacancyId: "V-2024-0892", stage: "Interview", score: 72, notes: "", createdAt: new Date("2024-01-10"), updatedAt: new Date("2024-01-12") },
+			{ id: "SP-2024-1002", candidateId: "C-2024-0452", vacancyId: "V-2024-0892", stage: "Rejected", score: 45, notes: "", createdAt: new Date("2024-01-11"), updatedAt: new Date("2024-01-13") },
+			{ id: "SP-2024-1003", candidateId: "C-2024-0453", vacancyId: "V-2024-0892", stage: "Hired", score: 95, notes: "", createdAt: new Date("2024-01-09"), updatedAt: new Date("2024-01-15") },
+		];
+
+		const sampleVacancy = {
+			id: "V-2024-0892", title: "Senior Full-Stack Developer", companyName: "TechCorp Solutions",
+			requiredSkills: ["TypeScript", "React", "Node.js"], preferredSkills: ["PostgreSQL", "Docker"],
+			minYearsExperience: 4, maxYearsExperience: 8, requiredEnglishLevel: "B2", requiredSeniority: "Senior",
+			salaryRangeMin: 5000, salaryRangeMax: 7000, isRemote: true, location: "Remote", status: "Open",
+		};
+
+		const candidateStatuses = ["Active", "In process", "Hired", "Inactive"];
+		const seniorityLevels = ["Junior", "Semi-Senior", "Senior", "Lead", "Executive"];
+		const englishLevels = ["A1", "A2", "B1", "B2", "C1", "C2", "Native"];
+		let displayedCandidates = [...candidates];
+
+		function filterCandidatesByCriteria(source, criteria) {
+			if (!Array.isArray(source) || criteria === null) return [];
+			const requiredSkills = (criteria.skills || []).filter(Boolean).map((skill) => skill.trim().toLowerCase());
+			return source.filter((candidate) => {
+				if (!candidate) return false;
+				const skills = new Set(candidate.skills.map((skill) => skill.toLowerCase()));
+				const salary = candidate.expectedSalary;
+				return requiredSkills.every((skill) => skills.has(skill)) &&
+					(!criteria.seniority || candidate.seniority === criteria.seniority) &&
+					(!criteria.availability || candidate.availability === criteria.availability) &&
+					(!criteria.status || candidate.status === criteria.status) &&
+					(criteria.minimumSalary === null || salary >= criteria.minimumSalary) &&
+					(criteria.maximumSalary === null || salary <= criteria.maximumSalary);
+			});
+		}
+
+		function findCandidateById(source, id) {
+			if (!Array.isArray(source) || typeof id !== "string") return null;
+			for (const candidate of source) if (candidate && candidate.id === id) return candidate;
+			return null;
+		}
+
+		function findCandidateByEmail(source, email) {
+			if (!Array.isArray(source) || typeof email !== "string" || !email.trim()) return null;
+			const normalizedEmail = email.trim().toLowerCase();
+			for (const candidate of source) {
+				if (candidate && candidate.email.toLowerCase() === normalizedEmail) return candidate;
+			}
+			return null;
+		}
+
+		function binarySearchCandidateBySalary(sorted, targetSalary) {
+			if (!Array.isArray(sorted) || sorted.length === 0 || !Number.isFinite(targetSalary)) return -1;
+			let lowerIndex = 0;
+			let upperIndex = sorted.length - 1;
+			while (lowerIndex <= upperIndex) {
+				const middleIndex = Math.floor((lowerIndex + upperIndex) / 2);
+				const candidate = sorted[middleIndex];
+				if (!candidate || !Number.isFinite(candidate.expectedSalary)) return -1;
+				if (candidate.expectedSalary === targetSalary) return middleIndex;
+				if (candidate.expectedSalary < targetSalary) lowerIndex = middleIndex + 1;
+				else upperIndex = middleIndex - 1;
+			}
+			return -1;
+		}
+
+		function sortCandidatesByNumericField(source, getValue, order) {
+			if (!Array.isArray(source) || source.length === 0) return [];
+			const direction = order === "asc" ? 1 : -1;
+			return source
+				.filter((candidate) => candidate && Number.isFinite(getValue(candidate)))
+				.map((candidate) => ({ candidate, value: getValue(candidate) }))
+				.sort((left, right) => direction * (left.value - right.value))
+				.map(({ candidate }) => candidate);
+		}
+
+		function sortCandidatesBySalary(source, order) {
+			return sortCandidatesByNumericField(source, (candidate) => candidate.expectedSalary, order);
+		}
+
+		function sortCandidatesByExperience(source, order) {
+			return sortCandidatesByNumericField(source, (candidate) => candidate.yearsOfExperience, order);
+		}
+
+		function calculateCandidateScore(candidate, vacancy) {
+			if (!candidate || !vacancy) return 0;
+			const normalized = (skills) => new Set(skills.map((skill) => skill.trim().toLowerCase()));
+			const candidateSkills = normalized(candidate.skills);
+			const requiredSkills = normalized(vacancy.requiredSkills);
+			const preferredSkills = normalized(vacancy.preferredSkills);
+			const requiredMatches = [...requiredSkills].filter((skill) => candidateSkills.has(skill)).length;
+			let skillScore = 0;
+			if (requiredSkills.size > 0) {
+				if (requiredMatches === requiredSkills.size) skillScore = 40;
+				else if (requiredMatches / requiredSkills.size >= 0.5) skillScore = 20;
+			}
+			const preferredBonus = [...preferredSkills].filter((skill) => candidateSkills.has(skill)).length * 10;
+			skillScore = Math.min(skillScore + preferredBonus, 40);
+
+			let experienceScore = 0;
+			if (candidate.yearsOfExperience >= vacancy.minYearsExperience && candidate.yearsOfExperience <= vacancy.maxYearsExperience) {
+				experienceScore = 20;
+			} else {
+				const distance = candidate.yearsOfExperience < vacancy.minYearsExperience
+					? vacancy.minYearsExperience - candidate.yearsOfExperience
+					: candidate.yearsOfExperience - vacancy.maxYearsExperience;
+				if (distance <= 2) experienceScore = 10;
+			}
+
+			const seniorityDistance = Math.abs(seniorityLevels.indexOf(candidate.seniority) - seniorityLevels.indexOf(vacancy.requiredSeniority));
+			const seniorityScore = seniorityDistance === 0 ? 15 : seniorityDistance === 1 ? 7 : 0;
+			const englishScore = englishLevels.indexOf(candidate.englishLevel) >= englishLevels.indexOf(vacancy.requiredEnglishLevel) ? 15 : 0;
+			let salaryScore = 0;
+			if (candidate.expectedSalary >= vacancy.salaryRangeMin && candidate.expectedSalary <= vacancy.salaryRangeMax) salaryScore = 10;
+			else if (candidate.expectedSalary > vacancy.salaryRangeMax && candidate.expectedSalary <= vacancy.salaryRangeMax * 1.2) salaryScore = 5;
+			return Math.min(skillScore + experienceScore + seniorityScore + englishScore + salaryScore, 100);
+		}
+
+		function rankCandidatesForVacancy(source, vacancy) {
+			return source.map((candidate) => ({ candidate, score: calculateCandidateScore(candidate, vacancy) }))
+				.sort((left, right) => right.score - left.score);
+		}
+
+		function countCandidatesByStatus(source) {
+			const counts = Object.fromEntries(candidateStatuses.map((status) => [status, 0]));
+			for (const candidate of source) if (candidate && Object.hasOwn(counts, candidate.status)) counts[candidate.status] += 1;
+			return counts;
+		}
+
+		function calculateAverageSalary(source) {
+			const salaries = source.map((candidate) => candidate?.expectedSalary)
+				.filter((salary) => Number.isFinite(salary) && salary > 0);
+			return salaries.length ? Math.round((salaries.reduce((sum, salary) => sum + salary, 0) / salaries.length) * 100) / 100 : 0;
+		}
+
+		function findTopSkills(source, topN) {
+			if (!Number.isFinite(topN) || topN <= 0) return [];
+			const counts = new Map();
+			for (const candidate of source) {
+				const skillsPerCandidate = new Map();
+				for (const value of candidate?.skills || []) {
+					if (typeof value !== "string" || !value.trim()) continue;
+					const key = value.trim().toLowerCase();
+					if (!skillsPerCandidate.has(key)) skillsPerCandidate.set(key, value.trim());
+				}
+				for (const [key, skill] of skillsPerCandidate) {
+					const entry = counts.get(key);
+					if (entry) entry.count += 1;
+					else counts.set(key, { skill, count: 1 });
+				}
+			}
+			return [...counts.values()].sort((left, right) => right.count - left.count || left.skill.localeCompare(right.skill)).slice(0, Math.floor(topN));
+		}
+
+		function calculateVacancyFillRate(processes) {
+			if (!Array.isArray(processes) || processes.length === 0) return 0;
+			const hired = processes.filter((process) => process?.stage === "Hired").length;
+			return Math.round((hired / processes.length) * 10000) / 100;
+		}
+
+		const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+		const statusStyles = {
+			Active: "bg-emerald-50 text-emerald-800",
+			"In process": "bg-sky-50 text-sky-800",
+			Hired: "bg-lime-100 text-forest",
+			Inactive: "bg-slate-100 text-slate-600",
+		};
+
+		function renderCandidates(items, title = "Candidati", note = "") {
+			displayedCandidates = [...items];
+			document.getElementById("result-title").textContent = title;
+			document.getElementById("result-count").textContent = `${items.length} ${items.length === 1 ? "risultato" : "risultati"}`;
+			const container = document.getElementById("candidate-list");
+			if (items.length === 0) {
+				container.innerHTML = `<div class="px-5 py-12 text-center"><p class="font-display text-base font-bold">Nessun candidato trovato</p><p class="mt-1 text-sm text-slate-500">Modifica i criteri e riprova.</p></div>`;
+				if (note) document.getElementById("search-note").textContent = note;
+				return;
+			}
+			container.innerHTML = items.map((candidate, index) => `
+				<article class="result-row grid gap-2 border-b border-line px-4 py-4 last:border-0 sm:grid-cols-[minmax(150px,1.3fr)_minmax(120px,1fr)_minmax(100px,.8fr)_minmax(110px,.8fr)_minmax(90px,.6fr)] sm:items-center sm:gap-3" style="animation-delay:${Math.min(index * 35, 180)}ms">
+					<div class="min-w-0"><p class="truncate text-sm font-bold">${escapeHtml(candidate.fullName)}</p><p class="mt-0.5 truncate font-mono text-[11px] text-slate-500">${escapeHtml(candidate.id)} · ${escapeHtml(candidate.email)}</p></div>
+					<div class="text-xs text-slate-600"><span class="sm:hidden">Seniority: </span>${escapeHtml(candidate.seniority)}</div>
+					<div class="text-xs text-slate-600"><span class="sm:hidden">Esperienza: </span>${candidate.yearsOfExperience} anni</div>
+					<div class="font-mono text-xs font-medium">${money.format(candidate.expectedSalary)}</div>
+					<div><span class="inline-flex rounded px-2 py-1 text-[11px] font-semibold ${statusStyles[candidate.status] || "bg-slate-100 text-slate-700"}">${escapeHtml(candidate.status)}</span></div>
+				</article>`).join("");
+			if (note) document.getElementById("search-note").textContent = note;
+		}
+
+		function escapeHtml(value) {
+			return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+		}
+
+		function formatMetric(label, value, detail) {
+			return `<article class="rounded-md border border-line bg-white p-4"><p class="text-xs font-semibold uppercase tracking-wide text-slate-500">${label}</p><p class="mt-2 font-display text-2xl font-bold">${value}</p><p class="mt-1 text-xs text-slate-500">${detail}</p></article>`;
+		}
+
+		function generateReport() {
+			const statuses = countCandidatesByStatus(candidates);
+			const topSkills = findTopSkills(candidates, 8);
+			const fillRate = calculateVacancyFillRate(selectionProcesses);
+			const ranked = rankCandidatesForVacancy(candidates, sampleVacancy);
+			document.getElementById("candidate-results").classList.add("hidden");
+			document.getElementById("report-results").classList.remove("hidden");
+			document.getElementById("result-title").textContent = "Report selezione";
+			document.getElementById("result-kicker").textContent = "REPORT / AGGREGATES";
+			document.getElementById("result-count").textContent = `${candidates.length} candidati · ${selectionProcesses.length} processi`;
+			document.getElementById("report-metrics").innerHTML = [
+				formatMetric("Candidati", candidates.length, "nel dataset"),
+				formatMetric("Salario atteso medio", money.format(calculateAverageSalary(candidates)), "media arrotondata a 2 decimali"),
+				formatMetric("Tasso assunzione", `${fillRate.toFixed(2)}%`, "processi terminati con Hired"),
+				formatMetric("Vacancy", sampleVacancy.id, `${sampleVacancy.title} · ${sampleVacancy.companyName}`),
+			].join("");
+			document.getElementById("status-report").innerHTML = Object.entries(statuses).map(([status, count]) => `
+				<div class="flex items-center justify-between gap-3 px-3 py-3 text-sm"><span>${escapeHtml(status)}</span><span class="font-mono font-medium">${count}</span></div>`).join("");
+			document.getElementById("skill-report").innerHTML = topSkills.length
+				? topSkills.map(({ skill, count }, index) => `<div class="flex items-center gap-3 px-3 py-3 text-sm"><span class="font-mono text-xs text-slate-400">0${index + 1}</span><span class="flex-1">${escapeHtml(skill)}</span><span class="font-mono text-xs text-slate-500">${count} candidati</span></div>`).join("")
+				: `<p class="px-3 py-4 text-sm text-slate-500">Nessuna skill disponibile.</p>`;
+			document.getElementById("ranking-report").innerHTML = ranked.map(({ candidate, score }, index) => `
+				<div class="flex flex-wrap items-center gap-3 px-3 py-3"><span class="grid h-7 w-7 place-items-center rounded bg-paper font-mono text-xs">${index + 1}</span><span class="min-w-32 flex-1 text-sm font-semibold">${escapeHtml(candidate.fullName)}</span><span class="font-mono text-xs text-slate-500">${escapeHtml(candidate.id)}</span><span class="rounded bg-forest px-2 py-1 font-mono text-xs font-medium text-white">${score}/100</span></div>`).join("");
+		}
+
+		document.getElementById("dataset-count").textContent = candidates.length;
+		renderCandidates(candidates);
+
+		document.querySelectorAll("[data-tab]").forEach((tab) => {
+			tab.addEventListener("click", () => {
+				document.querySelectorAll("[data-tab]").forEach((button) => button.setAttribute("aria-selected", String(button === tab)));
+				document.querySelectorAll("[data-panel]").forEach((panel) => {
+					const active = panel.dataset.panel === tab.dataset.tab;
+					panel.hidden = !active;
+					panel.classList.toggle("hidden", !active);
+				});
+				const isReport = tab.dataset.tab === "report";
+				document.getElementById("candidate-results").classList.toggle("hidden", isReport);
+				document.getElementById("report-results").classList.toggle("hidden", !isReport);
+				document.getElementById("result-title").textContent = isReport ? "Report selezione" : "Candidati";
+				document.getElementById("result-kicker").textContent = isReport ? "REPORT / AGGREGATES" : "DATASET / CANDIDATES";
+				if (!isReport) renderCandidates(displayedCandidates, document.getElementById("result-title").textContent);
+			});
+		});
+
+		document.getElementById("filter-form").addEventListener("submit", (event) => {
+			event.preventDefault();
+			const minimumValue = document.getElementById("filter-salary-min").value;
+			const maximumValue = document.getElementById("filter-salary-max").value;
+			const filtered = filterCandidatesByCriteria(candidates, {
+				skills: document.getElementById("filter-skills").value.split(",").map((skill) => skill.trim()).filter(Boolean),
+				seniority: document.getElementById("filter-seniority").value,
+				availability: document.getElementById("filter-availability").value,
+				status: document.getElementById("filter-status").value,
+				minimumSalary: minimumValue === "" ? null : Number(minimumValue),
+				maximumSalary: maximumValue === "" ? null : Number(maximumValue),
+			});
+			document.getElementById("candidate-results").classList.remove("hidden");
+			document.getElementById("report-results").classList.add("hidden");
+			renderCandidates(filtered, "Risultati filtro");
+		});
+
+		document.getElementById("filter-form").addEventListener("reset", () => {
+			requestAnimationFrame(() => {
+				document.getElementById("candidate-results").classList.remove("hidden");
+				renderCandidates(candidates, "Candidati");
+			});
+		});
+
+		document.getElementById("search-type").addEventListener("change", (event) => {
+			const input = document.getElementById("search-query");
+			const type = event.target.value;
+			input.type = type === "salary" ? "number" : "search";
+			input.step = type === "salary" ? "any" : "";
+			input.placeholder = type === "id" ? "Es. C-2024-0451" : type === "email" ? "Es. maria.gonzalez@email.com" : "Es. 4200";
+		});
+
+		document.getElementById("search-form").addEventListener("submit", (event) => {
+			event.preventDefault();
+			document.getElementById("search-note").textContent = "";
+			const type = document.getElementById("search-type").value;
+			const query = document.getElementById("search-query").value.trim();
+			let found = null;
+			let note = "";
+			if (type === "id") found = findCandidateById(candidates, query);
+			else if (type === "email") found = findCandidateByEmail(candidates, query);
+			else {
+				const sorted = sortCandidatesBySalary(candidates, "asc");
+				const index = binarySearchCandidateBySalary(sorted, Number(query));
+				found = index >= 0 ? sorted[index] : null;
+				note = index >= 0 ? `Ricerca binaria: indice ${index} nell'array ordinato per salario crescente.` : "Ricerca binaria: salario non trovato (indice -1).";
+			}
+			document.getElementById("candidate-results").classList.remove("hidden");
+			document.getElementById("report-results").classList.add("hidden");
+			renderCandidates(found ? [found] : [], found ? "Candidato trovato" : "Ricerca senza risultati", note);
+		});
+
+		document.getElementById("sort-form").addEventListener("submit", (event) => {
+			event.preventDefault();
+			const field = document.getElementById("sort-field").value;
+			const order = document.getElementById("sort-order").value;
+			const sorted = field === "salary"
+				? sortCandidatesBySalary(candidates, order)
+				: sortCandidatesByExperience(candidates, order);
+			const label = field === "salary" ? "salario atteso" : "esperienza";
+			document.getElementById("candidate-results").classList.remove("hidden");
+			document.getElementById("report-results").classList.add("hidden");
+			renderCandidates(sorted, `Ordine ${order === "asc" ? "crescente" : "decrescente"}`, `Ordinamento per ${label}. Il dataset originale è rimasto invariato.`);
+			document.getElementById("sort-note").textContent = `Ordinamento per ${label}; dataset originale invariato.`;
+		});
+
+		document.getElementById("generate-report").addEventListener("click", generateReport);
+	</script>
+</body>
+</html>
