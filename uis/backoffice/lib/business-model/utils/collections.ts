@@ -1,8 +1,52 @@
 import type {
 	AvailabilityStatus,
 	Candidate,
+	CandidateStatus,
 	SeniorityLevel,
 } from "../types/models";
+
+export interface CandidateFilterCriteria {
+	skills: string[];
+	seniority: SeniorityLevel | "";
+	availability: AvailabilityStatus | "";
+	status: CandidateStatus | "";
+	minimumSalary: number | null;
+	maximumSalary: number | null;
+}
+
+/** Applies all supplied criteria without mutating the source candidate list. */
+export function filterCandidatesByCriteria(
+	candidates: Candidate[] | null,
+	criteria: CandidateFilterCriteria | null,
+): Candidate[] {
+	if (!Array.isArray(candidates) || criteria == null) {
+		return [];
+	}
+
+	let matches = candidates.filter((candidate) => candidate != null);
+	if (criteria.skills.length > 0) {
+		matches = filterCandidatesBySkills(matches, criteria.skills);
+	}
+	if (criteria.seniority) {
+		matches = filterCandidatesBySeniority(matches, criteria.seniority);
+	}
+	if (criteria.availability) {
+		matches = filterCandidatesByAvailability(matches, [criteria.availability]);
+	}
+	if (criteria.status) {
+		matches = matches.filter((candidate) => candidate.status === criteria.status);
+	}
+	if (criteria.minimumSalary !== null || criteria.maximumSalary !== null) {
+		matches = matches.filter((candidate) => {
+			const salary = candidate.expectedSalary;
+			return Number.isFinite(salary) &&
+				(criteria.minimumSalary === null || salary >= criteria.minimumSalary) &&
+				(criteria.maximumSalary === null || salary <= criteria.maximumSalary);
+		});
+	}
+
+	return matches;
+}
 
 /** Returns candidates with every required skill, comparing skill names case-insensitively. */
 export function filterCandidatesBySkills(

@@ -51,10 +51,14 @@ You are building **one company** across many milestones and projects. Each top-l
 
 ## Current status of the template
 
-> 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
+> This repository now includes runnable Nexova applications and scoped agent workflow documentation.
 >
-> - `contexts/` contains the project briefs, organized by milestone.
-> - There is no root `AGENTS.md` yet.
+> - `uis/website/` is the public React, TypeScript, and Next.js app.
+> - `uis/backoffice/` is the internal React, TypeScript, and Next.js app, including Talent Pipeline and Business Model.
+> - `services/talent-pipeline-api/` documents the external API integration; it is not a locally hosted service or proxy.
+> - Root `AGENTS.md` routes contributors to the applicable `.agents/` conventions.
+> - `contexts/` remains the source of milestone briefs; its files are not changed by the current app migration.
+> - [Project context](./docs/project-context.md) summarizes Nexova and repository ownership; milestone briefs remain canonical for task details.
 > - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
 
 ---
@@ -67,7 +71,7 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 | Path                         | Purpose                                                                   | What you do here                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`contexts/`](./contexts/README.md) | Milestone-specific project briefs | **First step:** read the brief for the milestone you are building |
+| [`contexts/`](./contexts/) | Milestone-specific project briefs | **First step:** read the brief for the milestone you are building |
 | `docker-compose.yml`         | Local dev orchestration for the whole stack                               | Keep at repo root — wires `services/`, databases, and other containers from one place                         |
 | `README.md` / `README.es.md` | This guide                                                                | Orientation — you are here                                                                                    |
 

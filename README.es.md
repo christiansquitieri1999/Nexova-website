@@ -51,10 +51,14 @@ Estás construyendo **una sola empresa** a lo largo de muchos hitos y proyectos.
 
 ## Estado actual de la plantilla
 
-> 💡 Actualmente el repositorio ofrece solo una **estructura base de carpetas y documentación**. Todavía no incluye aplicaciones ejecutables ni scripts globales en la raíz.
+> El repositorio ahora incluye aplicaciones Nexova ejecutables y documentación de workflow para agentes.
 >
-> - `contexts/` contiene los briefs del proyecto, organizados por hito.
-> - No existe todavía un `AGENTS.md` en la raíz.
+> - `uis/website/` es la aplicación pública con React, TypeScript y Next.js.
+> - `uis/backoffice/` es la aplicación interna con React, TypeScript y Next.js; incluye Talent Pipeline y Business Model.
+> - `services/talent-pipeline-api/` documenta la integración con una API externa; no es un servicio local ni un proxy.
+> - El `AGENTS.md` raíz dirige al contributor a las convenciones correspondientes de `.agents/`.
+> - `contexts/` sigue siendo la fuente de briefs por hito; sus archivos no se modifican durante esta migración.
+> - [Contexto del proyecto](./docs/project-context.md) resume Nexova y la propiedad de carpetas; los briefs siguen siendo canónicos para los requisitos de cada hito.
 > - Existe metadata del paquete compartido en `packages/shared/package.json` (`@repo/shared-types`), pero aún no hay runner de workspace en raíz.
 
 ---
@@ -67,7 +71,7 @@ Lee el `README.md` enlazado dentro de cada carpeta antes de empezar a programar 
 
 | Ruta                         | Propósito                                                            | Qué haces aquí                                                                                               |
 | ---------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`contexts/`](./contexts/README.md) | Briefs específicos de cada hito | **Primer paso:** lee el brief del hito que estás construyendo |
+| [`contexts/`](./contexts/) | Briefs específicos de cada hito | **Primer paso:** lee el brief del hito que estás construyendo |
 | `docker-compose.yml`         | Orquestación local de todo el stack                                  | Mantener en la raíz del repo — conecta `services/`, bases de datos y otros contenedores desde un solo lugar  |
 | `README.md` / `README.es.md` | Esta guía                                                            | Orientación — estás aquí                                                                                     |
 

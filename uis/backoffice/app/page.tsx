@@ -16,7 +16,7 @@ export default async function Home() {
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-6xl px-5 py-10 sm:px-8">
-      <header className="mb-10 flex items-center justify-between border-b border-zinc-200 pb-5">
+      <header className="mb-10 flex flex-col gap-4 border-b border-zinc-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
         <Link href="/" className="flex items-center gap-3" aria-label="Nexova People and Talent home">
           <span className="flex size-10 items-center justify-center rounded-lg bg-emerald-700 text-sm font-bold text-white">
             NX
@@ -25,14 +25,17 @@ export default async function Home() {
             Nexova People &amp; Talent
           </span>
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:justify-end">
+          <Link href="/business-model" className="text-sm font-semibold text-emerald-800 hover:underline">
+            Business Model
+          </Link>
           <Link
             href="/candidates/new"
             className="rounded-md bg-emerald-800 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700/40"
           >
             + Add professional
           </Link>
-          <span className="text-sm text-zinc-500">Executive Assistant</span>
+          <span className="hidden text-sm text-zinc-500 sm:inline">Executive Assistant</span>
         </div>
       </header>
 
