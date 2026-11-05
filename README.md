@@ -89,18 +89,19 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 → See [`uis/README.md`](./uis/README.md)
 
-### `services/` — centralized company API (FastAPI)
+### `services/` — backend APIs and services
 
-**Purpose:** One **centralized FastAPI backend** for the whole company — a single entry point that keeps complexity low as the project grows.
+**Purpose:** Backend APIs and background services for company use cases. This folder can also document external API integrations; documenting an external API does not mean a local implementation exists.
 
 **Put here:**
 
-- One main FastAPI app (e.g. `api/`) with routers/modules per domain (locations, menus, sales, telemetry, etc.)
-- Background workers only when they truly need to run separately from the API
+- Local API implementations when an active milestone requests them, each with a service README and documented runtime/configuration.
+- Background workers when they need to run independently.
+- Documentation for external API integrations, clearly marked as external and noting whether a local runtime implementation exists.
 
-**Recommendation:** avoid splitting into many microservices early. Add endpoints to the same FastAPI app; extract a worker only when necessary.
+**Current integration:** `services/talent-pipeline-api/` documents an external API called directly by `uis/backoffice/`; this repository does not currently implement a local API or proxy.
 
-**Examples:** `/locations`, `/menus`, `/sales/reports`, webhook handlers, scheduled jobs
+**Recommendation:** Keep services focused and avoid adding a local proxy or parallel API tree unless the active task requires it.
 
 → See [`services/README.md`](./services/README.md)
 
@@ -278,7 +279,9 @@ ai-engineering-company-project-monorepo/
 │   └── 02-programming-fundamentals/
 ├── docker-compose.yml         # ← Local dev orchestration (repo root)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
-├── services/                  # Centralized FastAPI company API
+├── services/                  # Backend services and external API documentation
+├── .agents/                   # Agent instructions and scoped rules
+├── memory-bank/               # Business, technical, and progress context
 ├── data/
 │   ├── raw/                   # Source datasets
 │   ├── pipelines/             # ETL/ELT jobs

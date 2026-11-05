@@ -89,18 +89,19 @@ Lee el `README.md` enlazado dentro de cada carpeta antes de empezar a programar 
 
 → Ver [`uis/README.md`](./uis/README.md)
 
-### `services/` — API centralizada de la empresa (FastAPI)
+### `services/` — APIs y servicios backend
 
-**Propósito:** Un **backend FastAPI centralizado** para toda la empresa — un solo punto de entrada que reduce la complejidad a medida que crece el proyecto.
+**Propósito:** APIs backend y servicios en segundo plano para los casos de uso de la empresa. Esta carpeta también puede documentar integraciones con APIs externas; documentar una API externa no significa que exista una implementación local.
 
 **Pon aquí:**
 
-- Una app FastAPI principal (p. ej. `api/`) con routers/módulos por dominio (ubicaciones, menús, ventas, telemetría, etc.)
-- Workers en background solo cuando de verdad necesiten correr separados de la API
+- Implementaciones de APIs locales cuando lo solicite un hito activo, cada una con README y configuración de ejecución documentados.
+- Workers en segundo plano cuando deban ejecutarse de forma independiente.
+- Documentación de integraciones externas, indicando claramente que son externas y si existe una implementación local.
 
-**Recomendación:** evita dividir en muchos microservicios al inicio. Añade endpoints a la misma app FastAPI; extrae un worker solo cuando sea necesario.
+**Integración actual:** `services/talent-pipeline-api/` documenta una API externa a la que `uis/backoffice/` llama directamente; este repositorio no implementa actualmente una API local ni un proxy.
 
-**Ejemplos:** `/locations`, `/menus`, `/sales/reports`, webhooks, jobs programados
+**Recomendación:** Mantén los servicios enfocados y no añadas un proxy local ni un árbol de APIs paralelo salvo que la tarea activa lo requiera.
 
 → Ver [`services/README.md`](./services/README.md)
 
@@ -278,7 +279,9 @@ ai-engineering-company-project-monorepo/
 │   └── 02-programming-fundamentals/
 ├── docker-compose.yml         # ← Orquestación local (raíz del repo)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
-├── services/                  # API FastAPI centralizada de la empresa
+├── services/                  # Servicios backend y documentación de APIs externas
+├── .agents/                   # Instrucciones de agentes y reglas por ámbito
+├── memory-bank/               # Contexto de negocio, técnico y progreso
 ├── data/
 │   ├── raw/                   # Datasets fuente
 │   ├── pipelines/             # Jobs ETL/ELT
