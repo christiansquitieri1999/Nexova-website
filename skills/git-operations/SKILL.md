@@ -91,7 +91,7 @@ After the commit is verified:
 4. If the current branch is not `domain-model` or `main`, also suggest creating a pull request:
 
    ```
-   https://github.com/christiansquitieri1999/Nexova-website/ull/new/<branch-name>
+   https://github.com/christiansquitieri1999/Nexova-website/pull/new/<branch-name>
    ```
 
 If the user approves, use `git switch <target-branch>` first (never `git checkout`) before the push.
@@ -102,7 +102,7 @@ If the user approves, use `git switch <target-branch>` first (never `git checkou
 
 - **Always use `git switch`** to change branches. Never use `git checkout` for branch switching.
 - Before switching branches, ensure the working tree is clean (`git status --short` produces no output).
-- To create and switch to a new branch: `git swich -c <branch-name>`.
+- To create and switch to a new branch: `git switch -c <branch-name>`.
 - To switch to an existing branch: `git switch <branch-name>`.
 
 ---
@@ -111,13 +111,13 @@ If the user approves, use `git switch <target-branch>` first (never `git checkou
 
 The git-operations skill is considered successfully executed when:
 
-- [ ] All required tests were green before committing (or user explicitly overrode
+- [ ] All required tests were green before committing, or the user explicitly overrode the test gate.
 - [ ] Only the intended files are staged and committed
 - [ ] Working tree is clean after the commit
 - [ ] Commit message follows the professional template format
 - [ ] Branch was managed using `git switch` exclusively (never `git checkout`)
 - [ ] Commit was separated from push (push was only suggested, not executed)
-- [ ] The user was given the exact push command for teir current branch
+- [ ] The user was given the exact push command for their current branch.
 
 ---
 
@@ -127,19 +127,11 @@ The git-operations skill is considered successfully executed when:
 
 **Situation:** User implemented a new filter on the candidate page. Lint, typecheck, tests, and build all pass.
 
-1. Verify tests are green → yes, all pass
-2. Stage files: `git add uis/backoffice/app/candidate-tble.tsx`
-3. Write commit message:
-   ```
-   feat(backoffice): add skill-based filter to candidate table
-
-   - Implement multi-select skill filter with AND/OR logic
-   - Handle empty selection (shows all candidates)
-   - Add test for empty, partial, and full match scenarios
-   - Verified: lint, typechck, build, tests (all green)
-   ```
-4. Verify: `git og --oneline -3` shows the commit; `git status --short` is empty
-5. Report to user and suggest: `git push origin feature/candidate-skill-filter`
+1. Verify lint, typecheck, tests, and build; all required checks pass.
+2. Stage only the intended file: `git add uis/backoffice/app/candidate-table.tsx`.
+3. Commit with a professional message and a concise change summary.
+4. Verify `git log --oneline -3` shows the commit and `git status --short` is empty.
+5. Report the commit and suggest `git push origin feature/candidate-skill-filter`; do not push automatically.
 
 ### Example 2: Bug fix with user override
 

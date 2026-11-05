@@ -10,7 +10,7 @@ At the start of each session, read these files in order to establish context:
 4. **`docs/project-context.md`** — Persistent cross-milestone orientation and canonical application paths.
 5. **Root `README.md`** — Repository map and how to think about this monorepo.
 6. **The relevant milestone brief under `contexts/`** — Read-only input. Understand the stakeholder, the problem, and the requirements before writing any code.
-7. **The destination folder's `README.md`** and **the matching `.agents/` guide** (`.agents/website.md`, `.agents/backoffice.md`, or `.agents/services.md`).
+7. **The destination folder's `README.md`**, **the matching `.agents/` guide** (`.agents/website.md`, `.agents/backoffice.md`, or `.agents/services.md`), and the always-active rules in **`.agents/rules/development-rules.md`**.
 8. **Any more-specific `AGENTS.md` in the target subtree.**
 
 ---

@@ -5,7 +5,7 @@
 - [Public website](./website.md)
 - [Backoffice](./backoffice.md)
 - [Services and API integrations](./services.md)
-- [Development rules (always active, file-pattern, and agent-requested)](./development-rules.md)
+- [Development rules (always active, file-pattern, and agent-requested)](./rules/development-rules.md)
 
 These guides supplement, and do not replace, applicable `AGENTS.md` files in a project subtree.
 
