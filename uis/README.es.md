@@ -7,6 +7,13 @@ Los dos proyectos principales que se almacenan aquí son:
 - **`website`** — la presencia web pública de la compañía.
 - **`backoffice`** — la aplicación interna de administración. Es el lugar ideal para desarrollar múltiples soluciones dentro de un mismo proyecto: autenticación, gestión de personas, gestión de operaciones, comunicación interna y otras capacidades de back-office.
 
+## Aplicaciones Nexova
+
+- `website/` — sitio público y formulario de talento; Next.js, React, TypeScript y Tailwind CSS 4.
+- `backoffice/` — Talent Pipeline y Business Model internos; Next.js, React, TypeScript y Tailwind CSS 4. Talent Pipeline consume directamente la API externa configurada.
+
+Cada aplicación tiene un README local con comandos de instalación y verificación.
+
 Organiza `uis/` por **distintas áreas de la compañía** — cada subcarpeta agrupa un ámbito diferente (por ejemplo, web pública frente a operaciones internas) e incluye su propia documentación técnica y funcional.
 
 - **Propósito principal**: centralizar en un único lugar todas las aplicaciones frontend que dan soporte a los casos de uso de la compañía.

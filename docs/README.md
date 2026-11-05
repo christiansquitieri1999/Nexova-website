@@ -1,4 +1,6 @@
 # `docs` folder
+- [`project-context.md`](./project-context.md) is the persistent Nexova business and repository-ownership overview. Milestone briefs under `contexts/` remain read-only sources for their specific requirements.
+
 
 This folder holds **cross-cutting documentation** for the monorepo: architecture guides, technical decisions, conventions, processes, and any material shared across applications, pipelines, agents, and workflows.
 

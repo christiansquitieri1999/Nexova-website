@@ -171,7 +171,7 @@ export default function CandidateTable({ candidates }: Props) {
         </div>
       ) : (
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
-          <div className="overflow-x-auto">
+          <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[640px] border-collapse text-left text-sm">
               <thead className="bg-zinc-50 text-xs font-semibold uppercase text-zinc-500">
                 <tr>
@@ -248,6 +248,43 @@ export default function CandidateTable({ candidates }: Props) {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="divide-y divide-zinc-100 sm:hidden">
+            {filtered.map((candidate) => (
+              <article key={String(candidate.id)} className="space-y-3 p-4">
+                <div className="flex min-w-0 items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/candidates/${encodeURIComponent(String(candidate.id))}`}
+                      className="block truncate text-sm font-semibold text-zinc-900 hover:text-emerald-800"
+                    >
+                      {displayName(candidate)}
+                    </Link>
+                    <p className="mt-1 break-all text-xs text-zinc-500">{candidate.email}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(candidate.status)}`}>
+                    {STATUS_LABELS[candidate.status]}
+                  </span>
+                </div>
+                <dl className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="min-w-0">
+                    <dt className="font-medium text-zinc-500">Role</dt>
+                    <dd className="mt-1 break-words text-zinc-800">{candidate.position}</dd>
+                  </div>
+                  <div className="min-w-0">
+                    <dt className="font-medium text-zinc-500">Process stage</dt>
+                    <dd className="mt-1 break-words text-zinc-800">{STAGE_LABELS[candidate.stage]}</dd>
+                  </div>
+                </dl>
+                <Link
+                  href={`/candidates/${encodeURIComponent(String(candidate.id))}`}
+                  className="inline-flex min-h-10 items-center text-sm font-semibold text-emerald-800 hover:underline"
+                  aria-label={`View details for ${String(displayName(candidate))}`}
+                >
+                  View candidate
+                </Link>
+              </article>
+            ))}
           </div>
           <p className="border-t border-zinc-100 px-5 py-3 text-xs text-zinc-500">
             Showing {filtered.length} of {candidates.length} professionals
