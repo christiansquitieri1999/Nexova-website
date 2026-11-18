@@ -10,3 +10,7 @@ Cada subcarpeta de implementación debe corresponder a un servicio e incluir su 
 ## Integraciones externas
 
 - `talent-pipeline-api/` documenta la API externa utilizada por `uis/backoffice`. El backoffice la consume directamente; este repositorio no implementa un servicio local ni un proxy.
+
+## Servicios locales
+
+- [`api/`](./api/README.md) ofrece el endpoint local de análisis de incidencias. Devuelve solo métricas agregadas y nunca expone emails de clientes.

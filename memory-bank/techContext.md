@@ -34,6 +34,7 @@
 | Dependency | Type | Details |
 |---|---|---|
 | **Talent Pipeline API** | External HTTP API | Hosted at `https://playground.4geeks.com/tracker/api/v1` (configurable via `NEXT_PUBLIC_API_URL`). No local proxy or runtime service. Documented at `services/talent-pipeline-api/README.md`. |
+| **Incident Analysis API** | Local Python service | Standard-library HTTP service at `http://127.0.0.1:8000`, configurable in the backoffice via `NEXT_PUBLIC_INCIDENTS_API_URL`. `POST /api/incidents/analyze` accepts multipart CSV uploads and returns aggregate metrics only; no third-party package is required. |
 | **Reusable shared types** | Local package | Defined at `packages/shared/types/index.ts` under `@repo/shared-types`. Not consumed by current apps (no root workspace runner configured to link them). |
 
 ---
@@ -89,7 +90,8 @@ Scoped `.agents/` guides clarify that **destination paths are ownership boundari
 
 ### Testing
 
-- Backoffice only: unit tests run via `tsx --test tests/business-model.test.ts` using Node.js built-in `node:test` and `node:assert/strict`.
+- Backoffice unit tests run with `tsx --test` using Node.js built-in `node:test` and `node:assert/strict`.
+- Python analyzer and API tests run with `unittest`, without external Python dependencies.
 - Website has no test runner configured (pure static Next.js app).
 
 ### Deployment

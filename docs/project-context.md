@@ -18,10 +18,14 @@ Use the existing monorepo destinations; do not create a parallel frontend or API
 | --- | --- |
 | `uis/` | Company user-interface projects. Read [uis/README.md](../uis/README.md) first. |
 | `uis/website/` | Public corporate website. Its home route is `/`; keep brand and copy aligned with the applicable website brief. Read [the app README](../uis/website/README.md). |
-| `uis/backoffice/` | Internal company app, with its own layout and `/` entry route, separate from the public site. It currently includes Talent Pipeline and Business Model. Read [the app README](../uis/backoffice/README.md). |
+| `uis/backoffice/` | Internal company app, with its own layout and `/` entry route, separate from the public site. It includes Talent Pipeline, Business Model, and incident analysis. Read [the app README](../uis/backoffice/README.md). |
 | `services/` | Backend APIs and services. Read [services/README.md](../services/README.md) before adding a service. |
 
 The Talent Pipeline currently calls the external API configured by `NEXT_PUBLIC_API_URL` (default: `https://playground.4geeks.com/tracker/api/v1`). Its client is in `uis/backoffice/lib/`; `services/talent-pipeline-api/` documents that external dependency and does not host or proxy it.
+
+The incident dashboard calls the local privacy-safe analyzer under `services/api/` (default:
+`http://127.0.0.1:8000`). The analyzer contract and aggregate output live in
+`scripts/analyze.py`; neither the service nor UI exposes customer emails.
 
 Other responsibilities stay in their existing top-level folders: reusable packages in `packages/`, agent capabilities in `skills/`, agents in `agents/`, scripts in `scripts/`, and cross-cutting documentation in `docs/`. There is no root workspace runner configured.
 

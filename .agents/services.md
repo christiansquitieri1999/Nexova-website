@@ -5,3 +5,4 @@
 - Document external API dependencies under `services/` with ownership, base URL configuration, endpoints, methods, request/response shapes, pagination, validation, and error behavior.
 - A documentation-only integration is not a locally deployed service. Do not add a proxy, duplicate client, or credentials unless explicitly required.
 - Keep UI API calls in the owning app's API client until a real backend service is requested; update the integration documentation when its contract changes.
+- The incident-analysis API in `services/api/` is a local service. It reuses the aggregate-only analyzer in `scripts/analyze.py`; request logs and responses must never expose source rows or customer emails.
