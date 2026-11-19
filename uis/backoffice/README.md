@@ -7,8 +7,14 @@ Internal Next.js application for the Talent Pipeline and Business Model candidat
 - `/` — Talent Pipeline and candidate search.
 - `/candidates/new` and `/candidates/[id]` — candidate creation and profile workflows.
 - `/business-model` — sample candidate filters, searches, sorting, scoring, ranking, and selection reports.
+- `/incidents` — privacy-safe support-ticket CSV upload, quality checks, category/status visualizations, and aggregate export.
 
 The Talent Pipeline calls the external API configured by `NEXT_PUBLIC_API_URL`. It defaults to `https://playground.4geeks.com/tracker/api/v1`; see [`services/talent-pipeline-api`](../../services/talent-pipeline-api/README.md) for its documented contract and client behavior.
+
+The incident dashboard uploads `multipart/form-data` to the local API at
+`NEXT_PUBLIC_INCIDENTS_API_URL` (default `http://127.0.0.1:8000`). Start it from the repository root
+with `python services/api/api.py`; see [`services/api`](../../services/api/README.md) for its
+contract. The API and UI only return or display aggregate metrics.
 
 ## Run locally
 
@@ -26,6 +32,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ```bash
 npm run lint
 npm run typecheck
-npm test
+npx tsx --test tests/business-model.test.ts tests/incidents.test.ts
 npm run build
 ```
