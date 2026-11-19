@@ -13,6 +13,7 @@ The repository is in a **consolidated state** after completing the monorepo-orga
 - ✅ Delivery skill added (`skills/next-app-delivery/`)
 - ✅ Company briefing added (`contexts/04-briefing/`)
 - ✅ Memory bank created (`memory-bank/`)
+- ✅ Privacy-safe incident analysis CLI, local API, and backoffice dashboard added
 
 ---
 
@@ -58,6 +59,16 @@ The repository is in a **consolidated state** after completing the monorepo-orga
 |---|---|
 | `contexts/04-briefing/nexova-BRIEFING.en.md` | ✅ Added |
 | `contexts/04-briefing/nexova-BRIEFING.es.md` | ✅ Added |
+
+### Incident Report Processor (`scripts/`, `services/api/`, `uis/backoffice/`)
+
+| Item | Status |
+|---|---|
+| 100-row CSV validation with exact 96 valid / 4 invalid acceptance counts | ✅ Done |
+| Privacy-safe console summary and aggregate CSV export | ✅ Done |
+| Local HTTP endpoint with 5 MB upload limit | ✅ Done |
+| Backoffice upload dashboard and category/status/satisfaction visualizations | ✅ Done |
+| Python and TypeScript tests, lint, typecheck, and production build | ✅ Done |
 
 ---
 

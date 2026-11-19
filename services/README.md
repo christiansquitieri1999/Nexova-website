@@ -11,4 +11,8 @@ Each implementation subfolder must correspond to one service and include its tec
 
 - `talent-pipeline-api/` documents the external API used by `uis/backoffice`. The backoffice calls it directly; this repository does not implement a local service or proxy for it.
 
+## Local services
+
+- [`api/`](./api/README.md) provides the local incident-analysis endpoint. It returns aggregate metrics only and never exposes customer emails.
+
 > _Spanish version: [README.es.md](./README.es.md)._

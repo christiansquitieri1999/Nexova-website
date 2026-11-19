@@ -26,6 +26,9 @@ export default async function Home() {
           </span>
         </Link>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:justify-end">
+          <Link href="/incidents" className="text-sm font-semibold text-emerald-800 hover:underline">
+            Incident Analysis
+          </Link>
           <Link href="/business-model" className="text-sm font-semibold text-emerald-800 hover:underline">
             Business Model
           </Link>
