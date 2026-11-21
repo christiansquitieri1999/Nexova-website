@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+.pytest_cache/
+*.egg
+
+# Node
+node_modules/
+.next/
+
+# OS
+.DS_Store
+Thumbs.db
