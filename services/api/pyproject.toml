@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nexova-supplier-api"
+version = "0.1.0"
+description = "Nexova HR consultancy Supplier Directory backend"
+requires-python = ">=3.11"
+
+dependencies = [
+    "pydantic>=2.0",
+    "tinydb>=4.0",
+]
+
+[tool.setuptools]
+py-modules = ["cli_seed", "supplier_models"]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+seed = "cli_seed:main"
