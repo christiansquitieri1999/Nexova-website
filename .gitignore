@@ -11,6 +11,13 @@ __pycache__/
 node_modules/
 .next/
 
+# Environment files
+.env
+**/.env
+
+# TinyDB data files (auto-generated per environment)
+services/api/db/*.json
+
 # OS
 .DS_Store
 Thumbs.db

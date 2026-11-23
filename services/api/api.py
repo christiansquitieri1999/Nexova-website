@@ -23,9 +23,14 @@ sys.path.insert(0, str(SCRIPTS_DIRECTORY))
 
 from analyze import AnalysisError, analyze_text, format_metrics_csv  # noqa: E402
 
+from auth import get_current_user  # noqa: E402
+from auth_service import UserService  # noqa: E402
+
 
 MAX_BODY_BYTES = 5 * 1024 * 1024
-ALLOWED_ORIGIN = os.environ.get("NEXOVA_CORS_ORIGIN", "http://localhost:3000").rstrip("/")
+ALLOWED_ORIGIN = os.environ.get("NEXOVA_CORS_ORIGIN", "http://localhost:3000").rstrip(
+    "/"
+)
 
 
 def analyze_multipart(content_type: str, body: bytes) -> dict[str, Any]:
@@ -66,6 +71,35 @@ def analyze_multipart(content_type: str, body: bytes) -> dict[str, Any]:
 
 class IncidentApiHandler(BaseHTTPRequestHandler):
     server_version = "NexovaIncidentApi/1.0"
+    user_service = UserService()  # for JWT token validation
+
+    def _get_token_from_header(self) -> str | None:
+        """Extract the Bearer token from the Authorization header."""
+        auth_header = self.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return None
+        token = auth_header[len("Bearer ") :].strip()
+        if not token:
+            return None
+        return token
+
+    def _check_auth(self) -> str | None:
+        """Require authentication.  Returns user_id or sends 401 and returns None."""
+        token = self._get_token_from_header()
+        if token is None:
+            self._send_json(
+                401,
+                {"error": "Authentication required. Send a valid JWT Bearer token."},
+            )
+            return None
+        user = get_current_user(token, self.user_service)
+        if user is None:
+            self._send_json(
+                401,
+                {"error": "Invalid or expired authentication token"},
+            )
+            return None
+        return user["id"]
 
     def _is_origin_allowed(self) -> bool:
         origin = self.headers.get("Origin")
@@ -83,14 +117,16 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
         self._allow_origin_header()
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header(
+                    "Access-Control-Allow-Headers", "Content-Type, Authorization"
+                )
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
         self.wfile.write(encoded)
 
     def _send_html(self, status: int, title: str, message: str) -> None:
         encoded = (
-            "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
+            '<!doctype html><html lang="en"><head><meta charset="utf-8">'
             f"<title>{html.escape(title)}</title></head><body><main>"
             f"<h1>{html.escape(title)}</h1><p>{html.escape(message)}</p>"
             "</main></body></html>"
@@ -106,21 +142,30 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self) -> None:
         if not self._is_origin_allowed():
-            self._send_html(403, "Origin not allowed", "This origin is not allowed to use the API.")
+            self._send_html(
+                403, "Origin not allowed", "This origin is not allowed to use the API."
+            )
             return
         self._send_json(204, {})
 
     def do_GET(self) -> None:
         if not self._is_origin_allowed():
-            self._send_html(403, "Origin not allowed", "This origin is not allowed to use the API.")
+            self._send_html(
+                403, "Origin not allowed", "This origin is not allowed to use the API."
+            )
             return
         if self.path == "/health":
             self._send_json(200, {"status": "ok", "service": "nexova-incidents-api"})
             return
         if self.path == "/api/incidents/results/exports":
+            auth_id = self._check_auth()
+            if auth_id is None:
+                return
             server = self.server
             if not isinstance(server, IncidentApiServer):
-                self._send_html(500, "Service unavailable", "Analysis storage is unavailable.")
+                self._send_html(
+                    500, "Service unavailable", "Analysis storage is unavailable."
+                )
                 return
             result = server.get_last_result()
             if result is None:
@@ -131,31 +176,47 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
                 )
                 return
             csv_text = format_metrics_csv(result)
-            safe_stem = re.sub(r"[^A-Za-z0-9_-]+", "-", Path(result["source_file"]).stem).strip("-")
+            safe_stem = re.sub(
+                r"[^A-Za-z0-9_-]+", "-", Path(result["source_file"]).stem
+            ).strip("-")
             filename = f"{safe_stem or 'incidents'}-analysis.csv"
             encoded = csv_text.encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "text/csv; charset=utf-8")
-            self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+            self.send_header(
+                "Content-Disposition", f'attachment; filename="{filename}"'
+            )
             self.send_header("Content-Length", str(len(encoded)))
             self._allow_origin_header()
             self.end_headers()
             self.wfile.write(encoded)
             return
-        self._send_html(404, "Endpoint not found", "The requested endpoint does not exist.")
+        self._send_html(
+            404, "Endpoint not found", "The requested endpoint does not exist."
+        )
 
     def do_POST(self) -> None:
         if not self._is_origin_allowed():
-            self._send_html(403, "Origin not allowed", "This origin is not allowed to use the API.")
+            self._send_html(
+                403, "Origin not allowed", "This origin is not allowed to use the API."
+            )
             return
         if self.path != "/api/incidents/analyze":
-            self._send_html(404, "Endpoint not found", "The requested endpoint does not exist.")
+            self._send_html(
+                404, "Endpoint not found", "The requested endpoint does not exist."
+            )
+            return
+
+        auth_id = self._check_auth()
+        if auth_id is None:
             return
 
         try:
             content_length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
-            self._send_html(400, "Invalid request", "The Content-Length header is invalid.")
+            self._send_html(
+                400, "Invalid request", "The Content-Length header is invalid."
+            )
             return
         if content_length <= 0:
             self._send_html(400, "Empty upload", "The request body is required.")
@@ -168,7 +229,11 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
             raw_body = self.rfile.read(content_length)
             result = analyze_multipart(self.headers.get("Content-Type", ""), raw_body)
         except AnalysisError as error:
-            status = 415 if "Content-Type" in str(error) or ".csv extension" in str(error) else 422
+            status = (
+                415
+                if "Content-Type" in str(error) or ".csv extension" in str(error)
+                else 422
+            )
             self._send_html(status, "Invalid CSV upload", str(error))
             return
         except (UnicodeError, ValueError):
@@ -177,7 +242,9 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
 
         server = self.server
         if not isinstance(server, IncidentApiServer):
-            self._send_html(500, "Service unavailable", "Analysis storage is unavailable.")
+            self._send_html(
+                500, "Service unavailable", "Analysis storage is unavailable."
+            )
             return
         server.set_last_result(result)
         self._send_json(200, result)

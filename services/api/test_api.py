@@ -1,7 +1,13 @@
 import unittest
 from email.message import Message
 
-from api import ALLOWED_ORIGIN, AnalysisError, IncidentApiHandler, IncidentApiServer, analyze_multipart
+from api import (
+    ALLOWED_ORIGIN,
+    AnalysisError,
+    IncidentApiHandler,
+    IncidentApiServer,
+    analyze_multipart,
+)
 
 
 class IncidentApiTests(unittest.TestCase):
@@ -37,10 +43,14 @@ class IncidentApiTests(unittest.TestCase):
             b"private@example.test,5\r\n"
         )
         body = (
-            f"--{boundary}\r\n"
-            'Content-Disposition: form-data; name="file"; filename="tickets.csv"\r\n'
-            "Content-Type: text/csv\r\n\r\n"
-        ).encode() + csv_bytes + f"\r\n--{boundary}--\r\n".encode()
+            (
+                f"--{boundary}\r\n"
+                'Content-Disposition: form-data; name="file"; filename="tickets.csv"\r\n'  # noqa: E501
+                "Content-Type: text/csv\r\n\r\n"
+            ).encode()
+            + csv_bytes
+            + f"\r\n--{boundary}--\r\n".encode()
+        )
 
         result = analyze_multipart(f"multipart/form-data; boundary={boundary}", body)
 
@@ -65,10 +75,14 @@ class IncidentApiTests(unittest.TestCase):
         for filename, file_bytes in (("tickets.txt", b"value"), ("tickets.csv", b"")):
             with self.subTest(filename=filename):
                 body = (
-                    f"--{boundary}\r\n"
-                    f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
-                    "Content-Type: text/csv\r\n\r\n"
-                ).encode() + file_bytes + f"\r\n--{boundary}--\r\n".encode()
+                    (
+                        f"--{boundary}\r\n"
+                        f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'  # noqa: E501
+                        "Content-Type: text/csv\r\n\r\n"
+                    ).encode()
+                    + file_bytes
+                    + f"\r\n--{boundary}--\r\n".encode()
+                )
                 with self.assertRaises(AnalysisError):
                     analyze_multipart(f"multipart/form-data; boundary={boundary}", body)
 
