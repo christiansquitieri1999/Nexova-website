@@ -9,13 +9,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from tinydb import TinyDB, Query
 
 from supplier_models import (
     SupplierCreate,
-    SupplierPatch,
     SupplierResponse,
     build_create_doc,
     build_response_from_tinydb,

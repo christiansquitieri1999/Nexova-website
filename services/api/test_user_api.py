@@ -479,8 +479,7 @@ class UserApiTest(unittest.TestCase):
         body = json.loads(data)
         self.assertIn("error", body)
 
-
-# ==============================================================
+    # ==============================================================
     # POST /auth/login
     # ==============================================================
 
@@ -490,7 +489,8 @@ class UserApiTest(unittest.TestCase):
         uid = json.loads(resp)["user"]["id"]
 
         status, data = _request(
-            "POST", "/auth/login",
+            "POST",
+            "/auth/login",
             {"email": "alice@example.com", "password": "secret123"},
         )
         self.assertEqual(status, 200)
@@ -506,7 +506,8 @@ class UserApiTest(unittest.TestCase):
         _request("POST", "/users", _VALID_PAYLOAD)
 
         status, data = _request(
-            "POST", "/auth/login",
+            "POST",
+            "/auth/login",
             {"email": "alice@example.com", "password": "wrongpass"},
         )
         self.assertEqual(status, 401)
@@ -515,7 +516,8 @@ class UserApiTest(unittest.TestCase):
 
     def test_auth_login_401_unknown_user(self) -> None:
         status, data = _request(
-            "POST", "/auth/login",
+            "POST",
+            "/auth/login",
             {"email": "nobody@example.com", "password": "secret123"},
         )
         self.assertEqual(status, 401)
@@ -533,7 +535,8 @@ class UserApiTest(unittest.TestCase):
 
     def test_auth_me_200(self) -> None:
         _, resp = _request(
-            "POST", "/users",
+            "POST",
+            "/users",
             {**_VALID_PAYLOAD, "name": "Alice", "phone": "+34 600 111 222"},
         )
         uid = json.loads(resp)["user"]["id"]

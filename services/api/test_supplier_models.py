@@ -6,7 +6,6 @@ from __future__ import annotations
 import unittest
 from typing import Any
 
-import pydantic
 from pydantic import ValidationError
 
 from supplier_models import (

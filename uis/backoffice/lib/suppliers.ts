@@ -3,6 +3,9 @@
  *
  * Connects to the local supplier API (default http://127.0.0.1:8001).
  * Set NEXT_PUBLIC_SUPPLIER_API_URL in .env.local to override.
+ *
+ * Protected endpoints (POST, PATCH, DELETE) automatically inject the
+ * Authorization header from localStorage via @/lib/auth.
  */
 
 import type {
@@ -11,6 +14,7 @@ import type {
   SupplierFormData,
   SupplierRecord,
 } from "@/types/suppliers";
+import { authHeaders, authFetch } from "@/lib/auth";
 
 const DEFAULT_API_URL = "http://127.0.0.1:8001";
 
@@ -90,9 +94,9 @@ export async function getSupplier(id: string): Promise<SupplierRecord | null> {
 export async function createSupplier(
   data: SupplierFormData,
 ): Promise<SupplierRecord> {
-  const response = await fetch(apiUrl("/suppliers"), {
+  const response = await authFetch(apiUrl("/suppliers"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(data),
   });
 
@@ -137,11 +141,11 @@ export async function updateSupplierRate(
   id: string,
   monthly_rate: number,
 ): Promise<SupplierRecord> {
-  const response = await fetch(
+  const response = await authFetch(
     apiUrl(`/suppliers/${encodeURIComponent(id)}/rate`),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ monthly_rate }),
     },
   );
@@ -176,11 +180,11 @@ export async function updateSupplierStatus(
   id: string,
   status: string,
 ): Promise<SupplierRecord> {
-  const response = await fetch(
+  const response = await authFetch(
     apiUrl(`/suppliers/${encodeURIComponent(id)}/status`),
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders() },
       body: JSON.stringify({ status }),
     },
   );
@@ -212,9 +216,9 @@ export async function updateSupplierStatus(
 
 /** Delete a supplier. */
 export async function deleteSupplier(id: string): Promise<void> {
-  const response = await fetch(
+  const response = await authFetch(
     apiUrl(`/suppliers/${encodeURIComponent(id)}`),
-    { method: "DELETE" },
+    { method: "DELETE", headers: { ...authHeaders() } },
   );
 
   if (!response.ok) {
