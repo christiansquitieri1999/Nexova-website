@@ -1,3 +1,5 @@
+import { authHeaders, authFetch } from "@/lib/auth";
+
 export const INCIDENT_CATEGORIES = [
 	"TECHNICAL",
 	"BILLING",
@@ -103,10 +105,11 @@ export async function analyzeIncidentFile(file: File): Promise<IncidentAnalysis>
 
 	const formData = new FormData();
 	formData.set("file", file);
-	const response = await fetch(
+	const response = await authFetch(
 		`${process.env.NEXT_PUBLIC_INCIDENTS_API_URL ?? "http://127.0.0.1:8000"}/api/incidents/analyze`,
 		{
 			method: "POST",
+				headers: authHeaders(),
 			body: formData,
 		},
 	);
