@@ -62,9 +62,7 @@ def json_response(
     handler.send_header(
         "Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS"
     )
-    handler.send_header(
-        "Access-Control-Allow-Headers", "Content-Type, Authorization"
-    )
+    handler.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
     handler.send_header("Content-Length", str(len(body)))
     handler.end_headers()
     handler.wfile.write(body)
@@ -139,9 +137,7 @@ class SupplierHandler(BaseHTTPRequestHandler):
         self.send_header(
             "Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS"
         )
-        self.send_header(
-            "Access-Control-Allow-Headers", "Content-Type, Authorization"
-        )
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
 
     # ---- GET ----
@@ -190,6 +186,7 @@ class SupplierHandler(BaseHTTPRequestHandler):
 
     def _list_suppliers(self) -> None:
         from urllib.parse import urlparse, parse_qs
+
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
         country = params.get("country", [None])[0]
@@ -294,6 +291,7 @@ class SupplierHandler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt: str, *args) -> None:
         pass
+
 
 def run_server(host: str = HOST, port: int = PORT) -> HTTPServer:
     server = HTTPServer((host, port), SupplierHandler)

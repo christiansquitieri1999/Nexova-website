@@ -292,7 +292,10 @@ class SupplierApiTest(unittest.TestCase):
             "POST",
             "/suppliers",
             body=b"not json",
-            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.test_token}"},
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.test_token}",
+            },
         )
         resp = conn.getresponse()
         resp.read()
@@ -359,9 +362,7 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         detail = SupplierHandler.store.all()[0]
-        status, data = _request(
-            "GET", f"/suppliers/{detail.id}", token=self.test_token
-        )
+        status, data = _request("GET", f"/suppliers/{detail.id}", token=self.test_token)
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertEqual(body["id"], detail.id)
@@ -478,9 +479,7 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request(
-            "DELETE", f"/suppliers/{sid}", token=self.test_token
-        )
+        status, data = _request("DELETE", f"/suppliers/{sid}", token=self.test_token)
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertEqual(body["deleted"], sid)
@@ -517,5 +516,6 @@ class SupplierApiTest(unittest.TestCase):
         status, data = _request("GET", "/nope")
         self.assertEqual(status, 404)
 
+
 if __name__ == "__main__":
-        unittest.main()
+    unittest.main()
