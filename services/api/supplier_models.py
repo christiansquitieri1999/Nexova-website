@@ -66,6 +66,7 @@ COUNTRY_CURRENCY: dict[SupplierCountry, str] = {
 
 VALID_STATUSES: list[str] = ["active", "suspended"]
 
+
 def safe_validation_errors(errors: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Sanitize Pydantic error list for JSON serialization.
 
@@ -78,12 +79,17 @@ def safe_validation_errors(errors: list[dict[str, Any]]) -> list[dict[str, Any]]
         entry: dict[str, Any] = {}
         for k, v in err.items():
             if k == "ctx" and isinstance(v, dict):
-                entry[k] = {sk: str(sv) if not isinstance(sv, (str, int, float, bool, type(None))) else sv
-                            for sk, sv in v.items()}
+                entry[k] = {
+                    sk: str(sv)
+                    if not isinstance(sv, (str, int, float, bool, type(None)))
+                    else sv
+                    for sk, sv in v.items()
+                }
             else:
                 entry[k] = v
         safe.append(entry)
     return safe
+
 
 VALID_CATEGORIES: list[str] = [
     "job_boards",
@@ -113,9 +119,7 @@ CATEGORY_LABELS: dict[SupplierCategory, str] = {
 def _utcnow_iso() -> str:
     """ISO-8601 UTC timestamp without microseconds."""
     return (
-        datetime.now(timezone.utc)
-        .isoformat(timespec="seconds")
-        .replace("+00:00", "Z")
+        datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     )
 
 
@@ -219,13 +223,17 @@ class SupplierPatch(BaseModel):
     Only monthly_rate and status are mutable after creation.
     """
 
-    monthly_rate: Optional[float] = Field(None, gt=0, description="Updated monthly cost.")
+    monthly_rate: Optional[float] = Field(
+        None, gt=0, description="Updated monthly cost."
+    )
     status: Optional[SupplierStatus] = Field(None, description="New status.")
 
     @model_validator(mode="after")
     def at_least_one_field(self) -> "SupplierPatch":
         if self.monthly_rate is None and self.status is None:
-            raise ValueError("At least one of 'monthly_rate' or 'status' must be provided.")
+            raise ValueError(
+                "At least one of 'monthly_rate' or 'status' must be provided."
+            )
         return self
 
 
@@ -307,7 +315,7 @@ SUPPLIERS_SEED: list[dict[str, Any]] = [
         "currency": "USD",
         "status": "suspended",
         "contact_email": "accounts@greenhouse.io",
-        "notes": "Suspended after non-renewal. Sergio is evaluating migrating everything to Workable.",
+        "notes": "Suspended after non-renewal. Sergio is evaluating migrating everything to Workable.",  # noqa: E501
     },
     {
         "name": "Thomas International",
@@ -318,7 +326,7 @@ SUPPLIERS_SEED: list[dict[str, Any]] = [
         "status": "active",
         "contract_renewal_date": "2025-12-01",
         "contact_email": "clientes@thomas.es",
-        "notes": "Personality and aptitude tests for middle-management hiring processes.",
+        "notes": "Personality and aptitude tests for middle-management hiring processes.",  # noqa: E501
     },
     {
         "name": "HireVue",
@@ -360,7 +368,7 @@ SUPPLIERS_SEED: list[dict[str, Any]] = [
         "status": "active",
         "contract_renewal_date": "2025-10-01",
         "contact_email": "soporte@sage.com",
-        "notes": "Payroll and personnel management software for the Valencia headquarters.",
+        "notes": "Payroll and personnel management software for the Valencia headquarters.",  # noqa: E501
     },
     {
         "name": "Gusto",

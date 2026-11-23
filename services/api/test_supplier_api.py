@@ -251,7 +251,8 @@ class SupplierApiTest(unittest.TestCase):
 
     def test_post_422_zero_rate(self) -> None:
         status, data = _request(
-            "POST", "/suppliers",
+            "POST",
+            "/suppliers",
             {**_VALID_PAYLOAD, "monthly_rate": 0},
         )
         self.assertEqual(status, 422)
@@ -286,12 +287,16 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         SupplierHandler.store.insert_raw(
-            build_create_doc(SupplierCreate.model_validate({
-                **_VALID_PAYLOAD,
-                "name": "USA Supplier",
-                "country": "USA",
-                "currency": "USD",
-            }))
+            build_create_doc(
+                SupplierCreate.model_validate(
+                    {
+                        **_VALID_PAYLOAD,
+                        "name": "USA Supplier",
+                        "country": "USA",
+                        "currency": "USD",
+                    }
+                )
+            )
         )
         status, data = _request("GET", "/suppliers?country=Spain")
         self.assertEqual(status, 200)
@@ -336,7 +341,9 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": 999.0})
+        status, data = _request(
+            "PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": 999.0}
+        )
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertAlmostEqual(body["monthly_rate"], 999.0)
@@ -354,7 +361,9 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": -100})
+        status, data = _request(
+            "PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": -100}
+        )
         self.assertEqual(status, 422)
 
     def test_patch_rate_422_missing_field(self) -> None:
@@ -366,7 +375,9 @@ class SupplierApiTest(unittest.TestCase):
         self.assertEqual(status, 422)
 
     def test_patch_rate_404(self) -> None:
-        status, data = _request("PATCH", "/suppliers/deadbeef/rate", {"monthly_rate": 100})
+        status, data = _request(
+            "PATCH", "/suppliers/deadbeef/rate", {"monthly_rate": 100}
+        )
         self.assertEqual(status, 404)
 
     # ---- PATCH /suppliers/{id}/status ----
@@ -376,7 +387,9 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/status", {"status": "suspended"})
+        status, data = _request(
+            "PATCH", f"/suppliers/{sid}/status", {"status": "suspended"}
+        )
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertEqual(body["status"], "suspended")
@@ -386,11 +399,15 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/status", {"status": "archived"})
+        status, data = _request(
+            "PATCH", f"/suppliers/{sid}/status", {"status": "archived"}
+        )
         self.assertEqual(status, 422)
 
     def test_patch_status_404(self) -> None:
-        status, data = _request("PATCH", "/suppliers/deadbeef/status", {"status": "active"})
+        status, data = _request(
+            "PATCH", "/suppliers/deadbeef/status", {"status": "active"}
+        )
         self.assertEqual(status, 404)
 
     # ---- DELETE /suppliers/{id} ----

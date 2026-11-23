@@ -29,6 +29,7 @@ _DB_DIR = _HERE / "db"
 # Internal helpers
 # ------------------------------------------------------------------
 
+
 def _utcnow_iso() -> str:
     """Return current UTC time as ISO-8601 with Z suffix, no microseconds."""
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -42,6 +43,7 @@ def _db_path() -> str:
 # ------------------------------------------------------------------
 # Store class
 # ------------------------------------------------------------------
+
 
 class SupplierStore:
     """Manages supplier persistence via TinyDB.
@@ -71,10 +73,7 @@ class SupplierStore:
         return build_response_from_tinydb(doc)
 
     def all(self) -> list[SupplierResponse]:
-        return [
-            build_response_from_tinydb(doc)
-            for doc in self._all_raw()
-        ]
+        return [build_response_from_tinydb(doc) for doc in self._all_raw()]
 
     def get_by_id(self, supplier_id: str) -> SupplierResponse | None:
         doc = self._get_raw(supplier_id)
@@ -89,7 +88,9 @@ class SupplierStore:
         self._db.update(raw, doc_ids=[raw.doc_id])
         return build_response_from_tinydb(raw)
 
-    def update_status(self, supplier_id: str, new_status: str) -> SupplierResponse | None:
+    def update_status(
+        self, supplier_id: str, new_status: str
+    ) -> SupplierResponse | None:
         raw = self._get_raw(supplier_id)
         if raw is None:
             return None

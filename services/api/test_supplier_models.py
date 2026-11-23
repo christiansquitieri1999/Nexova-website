@@ -28,6 +28,7 @@ from supplier_models import (
 # Enum sanity
 # ======================================================================
 
+
 class EnumTest(unittest.TestCase):
     def test_supplier_status_accepts_active_and_suspended(self) -> None:
         self.assertEqual(SupplierStatus("active"), SupplierStatus.ACTIVE)
@@ -95,9 +96,7 @@ class SupplierCreateTest(unittest.TestCase):
 
     def test_name_exceeds_max_length_is_rejected(self) -> None:
         with self.assertRaises(ValidationError):
-            SupplierCreate.model_validate(
-                {**_VALID_PAYLOAD, "name": "X" * 201}
-            )
+            SupplierCreate.model_validate({**_VALID_PAYLOAD, "name": "X" * 201})
 
     def test_name_is_stripped(self) -> None:
         supplier = SupplierCreate.model_validate(
@@ -111,9 +110,7 @@ class SupplierCreateTest(unittest.TestCase):
 
     def test_empty_categories_rejected(self) -> None:
         with self.assertRaises(ValidationError):
-            SupplierCreate.model_validate(
-                {**_VALID_PAYLOAD, "categories": []}
-            )
+            SupplierCreate.model_validate({**_VALID_PAYLOAD, "categories": []})
 
     def test_invalid_category_rejected(self) -> None:
         with self.assertRaises(ValidationError):
@@ -150,9 +147,7 @@ class SupplierCreateTest(unittest.TestCase):
             )
             errors = ctx.exception.errors()
             if not any("must use" in str(e.get("msg", "")) for e in errors):
-                raise AssertionError(
-                    f"No country-currency mismatch error in {errors}"
-                )
+                raise AssertionError(f"No country-currency mismatch error in {errors}")
 
     def test_usa_with_eur_rejected(self) -> None:
         with self.assertRaises(ValidationError):
@@ -207,6 +202,7 @@ class SupplierCreateTest(unittest.TestCase):
 # SupplierPatch validation
 # ======================================================================
 
+
 class SupplierPatchTest(unittest.TestCase):
     def test_valid_rate_patch(self) -> None:
         patch = SupplierPatch.model_validate({"monthly_rate": 999.0})
@@ -242,9 +238,7 @@ class SupplierPatchTest(unittest.TestCase):
             SupplierPatch.model_validate({"status": "archived"})
 
     def test_extra_fields_ignored(self) -> None:
-        patch = SupplierPatch.model_validate(
-            {"monthly_rate": 100, "name": "Hacked"}
-        )
+        patch = SupplierPatch.model_validate({"monthly_rate": 100, "name": "Hacked"})
         # name should not be accepted — the model has no 'name' field
         self.assertFalse(hasattr(patch, "name"))
 
@@ -252,6 +246,7 @@ class SupplierPatchTest(unittest.TestCase):
 # ======================================================================
 # SupplierResponse
 # ======================================================================
+
 
 class SupplierResponseTest(unittest.TestCase):
     def test_valid_response_doc(self) -> None:
@@ -275,31 +270,36 @@ class SupplierResponseTest(unittest.TestCase):
 
     def test_response_requires_id_and_updated_at(self) -> None:
         with self.assertRaises(ValidationError):
-            SupplierResponse.model_validate({
-                "name": "No ID",
-                "country": "USA",
-                "categories": ["assessment_tools"],
-                "monthly_rate": 100.0,
-                "currency": "USD",
-                "status": "active",
-                # missing id, updated_at
-            })
+            SupplierResponse.model_validate(
+                {
+                    "name": "No ID",
+                    "country": "USA",
+                    "categories": ["assessment_tools"],
+                    "monthly_rate": 100.0,
+                    "currency": "USD",
+                    "status": "active",
+                    # missing id, updated_at
+                }
+            )
 
 
 # ======================================================================
 # build_create_doc
 # ======================================================================
 
+
 class BuildCreateDocTest(unittest.TestCase):
     def test_doc_has_id_and_updated_at(self) -> None:
-        payload = SupplierCreate.model_validate({
-            "name": "NewCo",
-            "country": "USA",
-            "categories": ["background_check"],
-            "monthly_rate": 150.0,
-            "currency": "USD",
-            "status": "active",
-        })
+        payload = SupplierCreate.model_validate(
+            {
+                "name": "NewCo",
+                "country": "USA",
+                "categories": ["background_check"],
+                "monthly_rate": 150.0,
+                "currency": "USD",
+                "status": "active",
+            }
+        )
         doc = build_create_doc(payload)
         self.assertIn("id", doc)
         self.assertIn("updated_at", doc)
@@ -308,14 +308,16 @@ class BuildCreateDocTest(unittest.TestCase):
         self.assertEqual(doc["currency"], "USD")
 
     def test_enum_values_serialized_to_strings(self) -> None:
-        payload = SupplierCreate.model_validate({
-            "name": "EnumCo",
-            "country": "Spain",
-            "categories": ["ats_software", "video_interview"],
-            "monthly_rate": 200.0,
-            "currency": "EUR",
-            "status": "active",
-        })
+        payload = SupplierCreate.model_validate(
+            {
+                "name": "EnumCo",
+                "country": "Spain",
+                "categories": ["ats_software", "video_interview"],
+                "monthly_rate": 200.0,
+                "currency": "EUR",
+                "status": "active",
+            }
+        )
         doc = build_create_doc(payload)
         self.assertIsInstance(doc["country"], str)
         self.assertIsInstance(doc["categories"][0], str)
@@ -326,6 +328,7 @@ class BuildCreateDocTest(unittest.TestCase):
 # ======================================================================
 # build_response_from_tinydb
 # ======================================================================
+
 
 class BuildResponseFromTinydbTest(unittest.TestCase):
     def test_strips_doc_id(self) -> None:
@@ -345,17 +348,20 @@ class BuildResponseFromTinydbTest(unittest.TestCase):
 
     def test_invalid_doc_raises(self) -> None:
         with self.assertRaises(ValidationError):
-            build_response_from_tinydb({
-                "doc_id": 1,
-                "id": "abc",
-                "name": "Test",
-                # missing most fields
-            })
+            build_response_from_tinydb(
+                {
+                    "doc_id": 1,
+                    "id": "abc",
+                    "name": "Test",
+                    # missing most fields
+                }
+            )
 
 
 # ======================================================================
 # Seeder data validation
 # ======================================================================
+
 
 class SeederDataTest(unittest.TestCase):
     def test_all_seed_suppliers_are_valid(self) -> None:
@@ -365,7 +371,7 @@ class SeederDataTest(unittest.TestCase):
                     SupplierCreate.model_validate(payload)
                 except ValidationError as e:
                     self.fail(
-                        f"Seed supplier '{payload['name']}' failed validation: {e.errors()}"
+                        f"Seed supplier '{payload['name']}' failed validation: {e.errors()}"  # noqa: E501
                     )
 
     def test_seed_has_15_entries(self) -> None:

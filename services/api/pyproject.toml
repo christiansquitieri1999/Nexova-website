@@ -9,7 +9,11 @@ description = "Nexova HR consultancy Supplier Directory backend"
 requires-python = ">=3.11"
 
 dependencies = [
+    "bcrypt>=5.0.0",
+    "libpass[bcrypt]>=1.9.5.post0",
     "pydantic>=2.0",
+    "python-dotenv>=1.2.4",
+    "python-jose[cryptography]>=3.5.0",
     "tinydb>=4.0",
 ]
 
