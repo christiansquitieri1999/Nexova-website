@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import json
 import re
-import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any
 

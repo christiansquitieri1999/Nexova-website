@@ -15,8 +15,10 @@ import unittest
 from http.client import HTTPConnection
 from typing import Any
 
-from pydantic import ValidationError
 
+from auth import create_access_token
+from auth_models import UserCreate
+from auth_service import UserService
 from supplier_models import (
     SUPPLIERS_SEED,
     SupplierCreate,
@@ -55,18 +57,35 @@ def _temp_db() -> str:
     return path
 
 
-def _request(method: str, path: str, body: Any = None) -> tuple[int, bytes]:
+def _request(
+    method: str,
+    path: str,
+    body: Any = None,
+    token: str | None = None,
+) -> tuple[int, bytes]:
+    headers = {"Content-Type": "application/json"} if body is not None else {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     conn = HTTPConnection(HOST, PORT, timeout=5)
     try:
         raw = None
         if body is not None:
             raw = json.dumps(body).encode("utf-8")
-        conn.request(method, path, body=raw, headers=_HEADERS if raw else {})
+        conn.request(method, path, body=raw, headers=headers)
         resp = conn.getresponse()
         data = resp.read()
         return resp.status, data
     finally:
         conn.close()
+
+
+# Class-level service for creating test users and JWT tokens
+_test_user_svc = UserService()
+
+
+def _token_for(uid: str) -> str:
+    """Create a valid JWT for the given TinyDB user id."""
+    return create_access_token(uid)
 
 
 # ======================================================================
@@ -124,7 +143,7 @@ class SupplierStoreTest(unittest.TestCase):
     # ---- all ----
 
     def test_all_returns_all(self) -> None:
-        ids = self._seed(3)
+        self._seed(3)
         all_s = self.store.all()
         self.assertEqual(len(all_s), 3)
 
@@ -213,6 +232,10 @@ class SupplierApiTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.db_path = _temp_db()
         SupplierHandler.store = SupplierStore(cls.db_path)
+        # Create a test user for JWT auth
+        _test_user = UserCreate(email="test-supplier@nexova.com", password="test123")
+        cls.test_user = _test_user_svc.create_user(_test_user)
+        cls.test_token = _token_for(cls.test_user.id)
         cls.server = run_server(HOST, PORT)
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
         cls.thread.start()
@@ -223,6 +246,7 @@ class SupplierApiTest(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         SupplierHandler.store.close()
+        _test_user_svc.delete_user(cls.test_user.id)
         try:
             os.unlink(cls.db_path)
         except OSError:
@@ -236,7 +260,9 @@ class SupplierApiTest(unittest.TestCase):
     # ---- POST /suppliers ----
 
     def test_post_201(self) -> None:
-        status, data = _request("POST", "/suppliers", _VALID_PAYLOAD)
+        status, data = _request(
+            "POST", "/suppliers", _VALID_PAYLOAD, token=self.test_token
+        )
         self.assertEqual(status, 201)
         body = json.loads(data)
         self.assertEqual(body["name"], "Test Supplier")
@@ -244,7 +270,9 @@ class SupplierApiTest(unittest.TestCase):
         self.assertIn("updated_at", body)
 
     def test_post_422_invalid_body(self) -> None:
-        status, data = _request("POST", "/suppliers", {"name": ""})
+        status, data = _request(
+            "POST", "/suppliers", {"name": ""}, token=self.test_token
+        )
         self.assertEqual(status, 422)
         body = json.loads(data)
         self.assertIn("error", body)
@@ -254,12 +282,18 @@ class SupplierApiTest(unittest.TestCase):
             "POST",
             "/suppliers",
             {**_VALID_PAYLOAD, "monthly_rate": 0},
+            token=self.test_token,
         )
         self.assertEqual(status, 422)
 
     def test_post_400_bad_json(self) -> None:
         conn = HTTPConnection(HOST, PORT, timeout=5)
-        conn.request("POST", "/suppliers", body=b"not json", headers=_HEADERS)
+        conn.request(
+            "POST",
+            "/suppliers",
+            body=b"not json",
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {self.test_token}"},
+        )
         resp = conn.getresponse()
         resp.read()
         conn.close()
@@ -325,13 +359,15 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         detail = SupplierHandler.store.all()[0]
-        status, data = _request("GET", f"/suppliers/{detail.id}")
+        status, data = _request(
+            "GET", f"/suppliers/{detail.id}", token=self.test_token
+        )
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertEqual(body["id"], detail.id)
 
     def test_get_by_id_404(self) -> None:
-        status, data = _request("GET", "/suppliers/deadbeef")
+        status, data = _request("GET", "/suppliers/deadbeef", token=self.test_token)
         self.assertEqual(status, 404)
 
     # ---- PATCH /suppliers/{id}/rate ----
@@ -342,7 +378,10 @@ class SupplierApiTest(unittest.TestCase):
         )
         sid = SupplierHandler.store.all()[0].id
         status, data = _request(
-            "PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": 999.0}
+            "PATCH",
+            f"/suppliers/{sid}/rate",
+            {"monthly_rate": 999.0},
+            token=self.test_token,
         )
         self.assertEqual(status, 200)
         body = json.loads(data)
@@ -353,7 +392,12 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": 0})
+        status, data = _request(
+            "PATCH",
+            f"/suppliers/{sid}/rate",
+            {"monthly_rate": 0},
+            token=self.test_token,
+        )
         self.assertEqual(status, 422)
 
     def test_patch_rate_422_negative(self) -> None:
@@ -362,7 +406,10 @@ class SupplierApiTest(unittest.TestCase):
         )
         sid = SupplierHandler.store.all()[0].id
         status, data = _request(
-            "PATCH", f"/suppliers/{sid}/rate", {"monthly_rate": -100}
+            "PATCH",
+            f"/suppliers/{sid}/rate",
+            {"monthly_rate": -100},
+            token=self.test_token,
         )
         self.assertEqual(status, 422)
 
@@ -371,12 +418,17 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("PATCH", f"/suppliers/{sid}/rate", {})
+        status, data = _request(
+            "PATCH", f"/suppliers/{sid}/rate", {}, token=self.test_token
+        )
         self.assertEqual(status, 422)
 
     def test_patch_rate_404(self) -> None:
         status, data = _request(
-            "PATCH", "/suppliers/deadbeef/rate", {"monthly_rate": 100}
+            "PATCH",
+            "/suppliers/deadbeef/rate",
+            {"monthly_rate": 100},
+            token=self.test_token,
         )
         self.assertEqual(status, 404)
 
@@ -388,7 +440,10 @@ class SupplierApiTest(unittest.TestCase):
         )
         sid = SupplierHandler.store.all()[0].id
         status, data = _request(
-            "PATCH", f"/suppliers/{sid}/status", {"status": "suspended"}
+            "PATCH",
+            f"/suppliers/{sid}/status",
+            {"status": "suspended"},
+            token=self.test_token,
         )
         self.assertEqual(status, 200)
         body = json.loads(data)
@@ -400,13 +455,19 @@ class SupplierApiTest(unittest.TestCase):
         )
         sid = SupplierHandler.store.all()[0].id
         status, data = _request(
-            "PATCH", f"/suppliers/{sid}/status", {"status": "archived"}
+            "PATCH",
+            f"/suppliers/{sid}/status",
+            {"status": "archived"},
+            token=self.test_token,
         )
         self.assertEqual(status, 422)
 
     def test_patch_status_404(self) -> None:
         status, data = _request(
-            "PATCH", "/suppliers/deadbeef/status", {"status": "active"}
+            "PATCH",
+            "/suppliers/deadbeef/status",
+            {"status": "active"},
+            token=self.test_token,
         )
         self.assertEqual(status, 404)
 
@@ -417,13 +478,15 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        status, data = _request("DELETE", f"/suppliers/{sid}")
+        status, data = _request(
+            "DELETE", f"/suppliers/{sid}", token=self.test_token
+        )
         self.assertEqual(status, 200)
         body = json.loads(data)
         self.assertEqual(body["deleted"], sid)
 
     def test_delete_404(self) -> None:
-        status, data = _request("DELETE", "/suppliers/deadbeef")
+        status, data = _request("DELETE", "/suppliers/deadbeef", token=self.test_token)
         self.assertEqual(status, 404)
 
     def test_delete_removes_from_store(self) -> None:
@@ -431,7 +494,7 @@ class SupplierApiTest(unittest.TestCase):
             build_create_doc(SupplierCreate.model_validate(_VALID_PAYLOAD))
         )
         sid = SupplierHandler.store.all()[0].id
-        _request("DELETE", f"/suppliers/{sid}")
+        _request("DELETE", f"/suppliers/{sid}", token=self.test_token)
         self.assertIsNone(SupplierHandler.store.get_by_id(sid))
 
     # ---- CORS ----
@@ -454,6 +517,5 @@ class SupplierApiTest(unittest.TestCase):
         status, data = _request("GET", "/nope")
         self.assertEqual(status, 404)
 
-
 if __name__ == "__main__":
-    unittest.main()
+        unittest.main()

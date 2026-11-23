@@ -23,6 +23,9 @@ sys.path.insert(0, str(SCRIPTS_DIRECTORY))
 
 from analyze import AnalysisError, analyze_text, format_metrics_csv  # noqa: E402
 
+from auth import get_current_user  # noqa: E402
+from auth_service import UserService  # noqa: E402
+
 
 MAX_BODY_BYTES = 5 * 1024 * 1024
 ALLOWED_ORIGIN = os.environ.get("NEXOVA_CORS_ORIGIN", "http://localhost:3000").rstrip(
@@ -68,6 +71,35 @@ def analyze_multipart(content_type: str, body: bytes) -> dict[str, Any]:
 
 class IncidentApiHandler(BaseHTTPRequestHandler):
     server_version = "NexovaIncidentApi/1.0"
+    user_service = UserService()  # for JWT token validation
+
+    def _get_token_from_header(self) -> str | None:
+        """Extract the Bearer token from the Authorization header."""
+        auth_header = self.headers.get("Authorization", "")
+        if not auth_header.startswith("Bearer "):
+            return None
+        token = auth_header[len("Bearer ") :].strip()
+        if not token:
+            return None
+        return token
+
+    def _check_auth(self) -> str | None:
+        """Require authentication.  Returns user_id or sends 401 and returns None."""
+        token = self._get_token_from_header()
+        if token is None:
+            self._send_json(
+                401,
+                {"error": "Authentication required. Send a valid JWT Bearer token."},
+            )
+            return None
+        user = get_current_user(token, self.user_service)
+        if user is None:
+            self._send_json(
+                401,
+                {"error": "Invalid or expired authentication token"},
+            )
+            return None
+        return user["id"]
 
     def _is_origin_allowed(self) -> bool:
         origin = self.headers.get("Origin")
@@ -85,7 +117,9 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(encoded)))
         self._allow_origin_header()
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header(
+                    "Access-Control-Allow-Headers", "Content-Type, Authorization"
+                )
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
         self.wfile.write(encoded)
@@ -124,6 +158,9 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "ok", "service": "nexova-incidents-api"})
             return
         if self.path == "/api/incidents/results/exports":
+            auth_id = self._check_auth()
+            if auth_id is None:
+                return
             server = self.server
             if not isinstance(server, IncidentApiServer):
                 self._send_html(
@@ -168,6 +205,10 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
             self._send_html(
                 404, "Endpoint not found", "The requested endpoint does not exist."
             )
+            return
+
+        auth_id = self._check_auth()
+        if auth_id is None:
             return
 
         try:

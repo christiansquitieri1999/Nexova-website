@@ -18,7 +18,6 @@ Run with:
 from __future__ import annotations
 
 import json
-import os
 import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Optional
@@ -29,7 +28,6 @@ from auth import create_access_token, get_current_user
 from auth_models import (
     UserCreate,
     UserUpdate,
-    UserResponse,
 )
 from auth_service import UserService
 from profile_models import ProfileCreate, ProfileUpdate
