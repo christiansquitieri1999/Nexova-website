@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+.pytest_cache/
+*.egg
+
+# Node
+node_modules/
+.next/
+
+# Environment files
+.env
+**/.env
+
+# TinyDB data files (auto-generated per environment)
+services/api/db/*.json
+
+# OS
+.DS_Store
+Thumbs.db

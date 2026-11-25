@@ -14,7 +14,7 @@ _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 This repository is the **starter template** for transversal projects. You will work on real company scenarios (Brasaland, TrackFlow, Nexova), building deliverables that map to course milestones (Web, Programming, Backend, Telemetry, RAG, Agents, Workflows, Real-time).
 
 - Create a template from this repository.
-- Replace the placeholder `CONTEXT.md` with your assigned company context.
+- Use `contexts/` to find the brief for each project milestone.
 - Use `skills/` and the directory-level `README.md` files as working guidance.
 
 ---
@@ -23,7 +23,7 @@ This repository is the **starter template** for transversal projects. You will w
 
 1. **Use this repository as a template** and create your own project repo.
 2. **Clone** your repository (or open it in Codespaces).
-3. **Replace** `CONTEXT.md` with the full context for your assigned company.
+3. **Open** the relevant brief under `contexts/` before starting a milestone.
 4. **Read this folder guide** and open the `README.md` of the folder you are working in.
 5. **Start implementing** in the right folder — do not dump everything in the root.
 6. **Document** what you add: each new app, service, agent, or pipeline gets a subfolder + README.
@@ -36,7 +36,7 @@ You are building **one company** across many milestones and projects. Each top-l
 
 | Layer               | Folders                           | What lives here                                                  |
 | ------------------- | --------------------------------- | ---------------------------------------------------------------- |
-| **Company context** | `CONTEXT.md`                      | Domain facts, field names, constraints for your assigned company |
+| **Milestone briefs** | `contexts/`                       | Requirements and domain details, organized by project milestone  |
 | **User-facing**     | `uis/`, `services/`               | Frontends and backends users (or operators) interact with        |
 | **Data**            | `data/`                           | Raw files, pipelines, processed datasets, evaluation sets        |
 | **AI**              | `agents/`, `skills/`, `mcps/`     | Agents, reusable agent capabilities, MCP tool servers            |
@@ -51,10 +51,14 @@ You are building **one company** across many milestones and projects. Each top-l
 
 ## Current status of the template
 
-> 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
+> This repository now includes runnable Nexova applications and scoped agent workflow documentation.
 >
-> - `CONTEXT.md` is a placeholder and must be replaced with your assigned company context.
-> - There is no root `AGENTS.md` yet.
+> - `uis/website/` is the public React, TypeScript, and Next.js app.
+> - `uis/backoffice/` is the internal React, TypeScript, and Next.js app, including Talent Pipeline and Business Model.
+> - `services/talent-pipeline-api/` documents the external API integration; it is not a locally hosted service or proxy.
+> - Root `AGENTS.md` routes contributors to the applicable `.agents/` conventions.
+> - `contexts/` remains the source of milestone briefs; its files are not changed by the current app migration.
+> - [Project context](./docs/project-context.md) summarizes Nexova and repository ownership; milestone briefs remain canonical for task details.
 > - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
 
 ---
@@ -67,7 +71,7 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 | Path                         | Purpose                                                                   | What you do here                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`CONTEXT.md`](./CONTEXT.md) | Single source of truth for your company (Brasaland, TrackFlow, or Nexova) | **First step:** copy your assigned company briefing here so every app, agent, and prompt uses the same domain |
+| [`contexts/`](./contexts/) | Milestone-specific project briefs | **First step:** read the brief for the milestone you are building |
 | `docker-compose.yml`         | Local dev orchestration for the whole stack                               | Keep at repo root — wires `services/`, databases, and other containers from one place                         |
 | `README.md` / `README.es.md` | This guide                                                                | Orientation — you are here                                                                                    |
 
@@ -85,18 +89,19 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 → See [`uis/README.md`](./uis/README.md)
 
-### `services/` — centralized company API (FastAPI)
+### `services/` — backend APIs and services
 
-**Purpose:** One **centralized FastAPI backend** for the whole company — a single entry point that keeps complexity low as the project grows.
+**Purpose:** Backend APIs and background services for company use cases. This folder can also document external API integrations; documenting an external API does not mean a local implementation exists.
 
 **Put here:**
 
-- One main FastAPI app (e.g. `api/`) with routers/modules per domain (locations, menus, sales, telemetry, etc.)
-- Background workers only when they truly need to run separately from the API
+- Local API implementations when an active milestone requests them, each with a service README and documented runtime/configuration.
+- Background workers when they need to run independently.
+- Documentation for external API integrations, clearly marked as external and noting whether a local runtime implementation exists.
 
-**Recommendation:** avoid splitting into many microservices early. Add endpoints to the same FastAPI app; extract a worker only when necessary.
+**Current integration:** `services/talent-pipeline-api/` documents an external API called directly by `uis/backoffice/`; this repository does not currently implement a local API or proxy.
 
-**Examples:** `/locations`, `/menus`, `/sales/reports`, webhook handlers, scheduled jobs
+**Recommendation:** Keep services focused and avoid adding a local proxy or parallel API tree unless the active task requires it.
 
 → See [`services/README.md`](./services/README.md)
 
@@ -269,10 +274,14 @@ Is it a CLI tool with its own package?     → internal/
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # This guide
-├── CONTEXT.md                 # ← Replace with your company briefing
+├── contexts/                  # ← Briefs organized by milestone
+│   ├── 01-public-website/
+│   └── 02-programming-fundamentals/
 ├── docker-compose.yml         # ← Local dev orchestration (repo root)
 ├── uis/                       # Frontends (website, backoffice, dashboards)
-├── services/                  # Centralized FastAPI company API
+├── services/                  # Backend services and external API documentation
+├── .agents/                   # Agent instructions and scoped rules
+├── memory-bank/               # Business, technical, and progress context
 ├── data/
 │   ├── raw/                   # Source datasets
 │   ├── pipelines/             # ETL/ELT jobs
