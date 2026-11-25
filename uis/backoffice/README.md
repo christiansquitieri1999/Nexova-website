@@ -9,16 +9,17 @@ Internal Next.js application for the Talent Pipeline and Business Model candidat
 - `/login`, `/register`, `/forgot-password`, and `/reset-password` — account authentication and password recovery flows.
 - `/account/profile` and `/account/change-password` — authenticated profile and password management.
 - `/business-model` — sample candidate filters, searches, sorting, scoring, ranking, and selection reports.
-- `/incidents` — privacy-safe support-ticket CSV upload, quality checks, category/status visualizations, and aggregate export.
+- `/incidents` — centralized incident registration, filtering, lifecycle status updates, and aggregate metrics.
 - `/suppliers` — searchable/filterable Supplier Directory with rate and status controls.
 - `/suppliers/new` — supplier registration form.
 
 The Talent Pipeline calls the external API configured by `NEXT_PUBLIC_API_URL`. It defaults to `https://playground.4geeks.com/tracker/api/v1`; see [`services/talent-pipeline-api`](../../services/talent-pipeline-api/README.md) for its documented contract and client behavior.
 
-The incident dashboard uploads `multipart/form-data` to the local API at
-`NEXT_PUBLIC_INCIDENTS_API_URL` (default `http://127.0.0.1:8000`). Start it from the repository root
-with `python services/api/api.py`; see [`services/api`](../../services/api/README.md) for its
-contract. The API and UI only return or display aggregate metrics.
+The Incident Manager calls the local API at `NEXT_PUBLIC_INCIDENTS_API_URL`
+(default `http://127.0.0.1:8003`). Start it from the repository root with
+`python services/api/incident_api.py`; see [`services/api`](../../services/api/README.md) for its
+contract and seed instructions. The `/incidents` page provides registration, list filtering,
+lifecycle status updates, and summary metrics.
 
 The Supplier Directory uses the local TinyDB API at `NEXT_PUBLIC_SUPPLIER_API_URL` (default
 `http://127.0.0.1:8001`). Start it from `services/api/` with `python supplier_api.py`; seed the

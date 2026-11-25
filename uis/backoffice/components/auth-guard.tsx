@@ -44,7 +44,8 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       router.replace("/");
     } else {
       // Everything is fine
-      queueMicrotask(() => setAllowed(true));
+      const frame = window.requestAnimationFrame(() => setAllowed(true));
+      return () => window.cancelAnimationFrame(frame);
     }
   }, [router, pathname]);
 
