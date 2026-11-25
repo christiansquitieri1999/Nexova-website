@@ -30,7 +30,7 @@ export default async function Home() {
             Supplier Directory
           </Link>
           <Link href="/incidents" className="text-sm font-semibold text-emerald-800 hover:underline">
-            Incident Analysis
+                      Incident Manager
           </Link>
           <Link href="/business-model" className="text-sm font-semibold text-emerald-800 hover:underline">
             Business Model

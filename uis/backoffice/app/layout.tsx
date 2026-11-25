@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthGuard from "@/components/auth-guard";
 import NavBar from "@/components/nav-bar";
@@ -27,18 +26,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Suspense
-          fallback={
-            <div className="flex min-h-screen items-center justify-center">
-              <p className="text-gray-500">Loading...</p>
-            </div>
-          }
-        >
-          <AuthGuard>
-            <NavBar />
-            <main className="flex-1">{children}</main>
-          </AuthGuard>
-        </Suspense>
+        <AuthGuard>
+          <NavBar />
+          <main className="flex-1">{children}</main>
+        </AuthGuard>
       </body>
     </html>
   );
