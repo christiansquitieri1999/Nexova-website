@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
   getCurrentUser,
@@ -221,6 +222,13 @@ export default function ProfilePage() {
           >
             Log out
           </button>
+
+          <Link
+            href="/account/change-password"
+            className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50"
+          >
+            Change password
+          </Link>
         </div>
       </form>
     </div>

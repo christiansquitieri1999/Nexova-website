@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { getToken } from "@/lib/auth";
 
 /** Paths that are accessible without authentication. */
-const PUBLIC_PATHS = ["/login", "/register"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+];
 
 /**
  * AuthGuard — a client component that:
@@ -31,12 +36,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           ? `?redirect=${encodeURIComponent(pathname)}`
           : "";
       router.replace(`/login${redirectParam}`);
-    } else if (token && isPublic) {
+    } else if (
+      token &&
+      (pathname === "/login" || pathname === "/register")
+    ) {
       // Already authenticated on login/register → go home
       router.replace("/");
     } else {
       // Everything is fine
-      setAllowed(true);
+      queueMicrotask(() => setAllowed(true));
     }
   }, [router, pathname]);
 

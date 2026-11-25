@@ -160,6 +160,34 @@ class UserUpdate(BaseModel):
         return self
 
 
+class ForgotPasswordRequest(BaseModel):
+    """Payload for POST /auth/forgot-password."""
+
+    email: str = Field(..., min_length=1, max_length=254)
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        stripped = v.strip().lower()
+        if not stripped or "@" not in stripped:
+            raise ValueError("Email must be valid.")
+        return stripped
+
+
+class ResetPasswordRequest(BaseModel):
+    """Payload for POST /auth/reset-password."""
+
+    token: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+
+class ChangePasswordRequest(BaseModel):
+    """Payload for POST /auth/change-password."""
+
+    current_password: str = Field(..., min_length=1, max_length=128)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+
 # ======================================================================
 # Response model  —  what the API returns (never the password)
 # ======================================================================

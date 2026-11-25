@@ -18,6 +18,7 @@ Run with:
 from __future__ import annotations
 
 import json
+import os
 import re
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Optional
@@ -28,8 +29,12 @@ from auth import create_access_token, get_current_user
 from auth_models import (
     UserCreate,
     UserUpdate,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    ChangePasswordRequest,
 )
 from auth_service import UserService
+from password_reset import PasswordResetService, send_password_reset_email
 from profile_models import ProfileCreate, ProfileUpdate
 from profile_service import ProfileService
 
@@ -43,6 +48,9 @@ ALLOWED_ORIGIN = "http://localhost:3000"
 
 _PATH_RE_AUTH_LOGIN = re.compile(r"^/auth/login/?$")
 _PATH_RE_AUTH_ME = re.compile(r"^/auth/me/?$")
+_PATH_RE_AUTH_FORGOT_PASSWORD = re.compile(r"^/auth/forgot-password/?$")
+_PATH_RE_AUTH_RESET_PASSWORD = re.compile(r"^/auth/reset-password/?$")
+_PATH_RE_AUTH_CHANGE_PASSWORD = re.compile(r"^/auth/change-password/?$")
 _PATH_RE_USERS = re.compile(r"^/users/?$")
 _PATH_RE_USER_ID = re.compile(r"^/users/([a-zA-Z0-9_-]+)/?$")
 _PATH_RE_PROFILES_ME = re.compile(r"^/profiles/me/?$")
@@ -124,6 +132,8 @@ class UserHandler(BaseHTTPRequestHandler):
 
     user_service = UserService()  # class-level, shared across requests
     profile_service = ProfileService()
+    password_reset_service = PasswordResetService()
+    password_reset_email_sender = send_password_reset_email
 
     # ---- CORS preflight ----
 
@@ -173,6 +183,15 @@ class UserHandler(BaseHTTPRequestHandler):
         m = _PATH_RE_AUTH_LOGIN.match(path)
         if m:
             return self._auth_login()
+        m = _PATH_RE_AUTH_FORGOT_PASSWORD.match(path)
+        if m:
+            return self._auth_forgot_password()
+        m = _PATH_RE_AUTH_RESET_PASSWORD.match(path)
+        if m:
+            return self._auth_reset_password()
+        m = _PATH_RE_AUTH_CHANGE_PASSWORD.match(path)
+        if m:
+            return self._auth_change_password()
         m = _PATH_RE_USERS.match(path)
         if m:
             return self._create_user()
@@ -301,6 +320,133 @@ class UserHandler(BaseHTTPRequestHandler):
                 },
             },
         )
+
+    # ---- POST /auth/forgot-password ----
+
+    def _auth_forgot_password(self) -> None:
+        body = read_json_body(self)
+        payload_email: str | None = None
+        if isinstance(body, dict):
+            email = body.get("email")
+            if isinstance(email, str):
+                payload_email = email.strip().lower()
+        if payload_email:
+            try:
+                payload = ForgotPasswordRequest.model_validate({"email": payload_email})
+            except ValidationError:
+                payload = None
+        else:
+            payload = None
+
+        user = (
+            self.user_service.get_user_by_email(payload.email)
+            if payload is not None
+            else None
+        )
+        if payload is not None and user is not None and user["is_active"]:
+            try:
+                reset_token = self.password_reset_service.create_token(user["id"])
+                reset_base_url = os.environ.get(
+                    "PASSWORD_RESET_URL",
+                    "http://localhost:3000/reset-password",
+                ).rstrip("?")
+                separator = "&" if "?" in reset_base_url else "?"
+                reset_link = f"{reset_base_url}{separator}token={reset_token}"
+                self.password_reset_email_sender(payload.email, reset_link)
+            except (RuntimeError, OSError):
+                # Password-reset requests must not reveal account existence or email outages.
+                pass
+
+        json_response(
+            self,
+            200,
+            {"message": "If an account exists for this email, a reset link has been sent."},
+        )
+
+    # ---- POST /auth/reset-password ----
+
+    def _auth_reset_password(self) -> None:
+        body = read_json_body(self)
+        if body is None:
+            error_response(self, 400, "Invalid JSON body")
+            return
+        if not isinstance(body, dict):
+            error_response(self, 422, "Request body must be a JSON object")
+            return
+        try:
+            payload = ResetPasswordRequest.model_validate(body)
+        except ValidationError as e:
+            error_response(
+                self,
+                400,
+                "Invalid reset request",
+                safe_validation_errors(e.errors(include_url=False)),
+            )
+            return
+
+        def update_password(user_id: str) -> bool:
+            updated = self.user_service.update_user(
+                user_id,
+                UserUpdate(password=payload.new_password),
+            )
+            return updated is not None
+
+        user_id = self.password_reset_service.consume_token_after_action(
+            payload.token,
+            update_password,
+        )
+        if user_id is None:
+            error_response(
+                self,
+                400,
+                "Invalid, expired, or already used password reset token.",
+            )
+            return
+
+        json_response(self, 200, {"message": "Password updated successfully."})
+
+    # ---- POST /auth/change-password ----
+
+    def _auth_change_password(self) -> None:
+        caller_id = self._check_auth()
+        if caller_id is None:
+            return
+
+        body = read_json_body(self)
+        if body is None:
+            error_response(self, 400, "Invalid JSON body")
+            return
+        if not isinstance(body, dict):
+            error_response(self, 422, "Request body must be a JSON object")
+            return
+        try:
+            payload = ChangePasswordRequest.model_validate(body)
+        except ValidationError as e:
+            error_response(
+                self,
+                400,
+                "Invalid password change request",
+                safe_validation_errors(e.errors(include_url=False)),
+            )
+            return
+
+        user = self.user_service.get_user_by_id(caller_id)
+        if user is None:
+            error_response(self, 401, "Invalid authentication token")
+            return
+        if not self.user_service.authenticate(user["email"], payload.current_password):
+            error_response(self, 400, "Current password is incorrect.")
+            return
+
+        updated = self.user_service.update_user(
+            caller_id,
+            UserUpdate(password=payload.new_password),
+        )
+        if updated is None:
+            error_response(self, 401, "Invalid authentication token")
+            return
+
+        json_response(self, 200, {"message": "Password changed successfully."})
 
     # ---- POST /users ----
 

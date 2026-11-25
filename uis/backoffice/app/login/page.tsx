@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") ?? "/";
+  const passwordReset = searchParams.get("passwordReset") === "success";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,6 +51,11 @@ function LoginForm() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {passwordReset && (
+            <div className="rounded-md bg-green-50 p-3 text-sm text-green-700">
+              Password updated successfully. Please sign in.
+            </div>
+          )}
           {error && (
             <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
               {error}
@@ -106,6 +112,15 @@ function LoginForm() {
             </button>
           </div>
         </form>
+
+        <p className="mt-4 text-center">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+          >
+            Forgot your password?
+          </Link>
+        </p>
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{" "}

@@ -80,6 +80,30 @@ Supplier categories are `job_boards`, `ats_software`, `assessment_tools`, `train
 `payroll_and_hr_software`, `video_interview`, `background_check`, `office_and_facilities`, and
 `it_and_software_licenses`.
 
+## Password recovery API
+
+The User & Profile API on port `8002` exposes:
+
+- `POST /auth/forgot-password` — accepts `{"email":"person@nexova.com"}` and always returns `200`
+  without revealing whether the account exists.
+- `POST /auth/reset-password` — accepts `{"token":"...","new_password":"..."}` and returns `400`
+  for invalid, expired, or previously used reset tokens.
+- `POST /auth/change-password` — accepts `{"current_password":"...","new_password":"..."}` and
+  requires a valid session bearer token; it returns `400` when the current password is wrong.
+
+Configure password recovery with these environment variables:
+
+| Variable | Required | Purpose |
+|---|---:|---|
+| `SECRET_KEY` | Yes | Existing HMAC key for session JWT signing; reset tokens use `RESET_TOKEN_SECRET` when set |
+| `RESET_TOKEN_SECRET` | Yes | Dedicated HMAC key for password-reset JWT signing |
+| `RESEND_API_KEY` | Yes | Resend API key used to send reset emails |
+| `RESEND_FROM_EMAIL` | Yes | Verified Resend sender, for example `Nexova <passwords@your-domain.com>` |
+| `PASSWORD_RESET_URL` | No | Frontend reset route; defaults to `http://localhost:3000/reset-password` |
+
+Add the values to `services/api/.env` locally. Never commit that file or paste API keys into source
+or responses. Use `services/api/.env.example` as the variable-name template.
+
 ### Seed initial suppliers
 
 From `services/api/`, run the installed `seed` command:

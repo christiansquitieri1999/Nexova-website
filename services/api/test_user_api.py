@@ -14,6 +14,7 @@ import time
 import unittest
 from http.client import HTTPConnection
 from typing import Any
+from unittest.mock import patch
 
 from auth import create_access_token
 from user_api import UserHandler, run_server
@@ -116,11 +117,28 @@ class UserApiTest(unittest.TestCase):
         self.profile_db = _temp_db()
         UserHandler.user_service = UserService(self.user_db)
         UserHandler.profile_service = ProfileService(self.profile_db)
+        self.reset_db = _temp_db()
+        from password_reset import PasswordResetService
+        UserHandler.password_reset_service.close()
+        UserHandler.password_reset_service = PasswordResetService(self.reset_db)
+        self.reset_secret = patch.dict(
+            os.environ,
+            {"SECRET_KEY": "test-session-secret", "RESET_TOKEN_SECRET": "test-reset-secret"},
+        )
+        self.reset_secret.start()
+        self.sent_reset_emails = []
+        UserHandler.password_reset_email_sender = staticmethod(
+            lambda email, link: self.sent_reset_emails.append((email, link))
+        )
 
     def tearDown(self) -> None:
+        self.reset_secret.stop()
+        UserHandler.password_reset_service.close()
+        UserHandler.password_reset_email_sender = staticmethod(lambda email, link: None)
         try:
             os.unlink(self.user_db)
             os.unlink(self.profile_db)
+            os.unlink(self.reset_db)
         except OSError:
             pass
 
@@ -528,6 +546,158 @@ class UserApiTest(unittest.TestCase):
 
         status, data = _request("POST", "/auth/login", {"password": "only"})
         self.assertEqual(status, 422)
+
+    # ==============================================================
+    # POST /auth/forgot-password
+    # ==============================================================
+
+    def test_forgot_password_200_existing_user_sends_email(self) -> None:
+        _request("POST", "/users", _VALID_PAYLOAD)
+
+        status, data = _request(
+            "POST",
+            "/auth/forgot-password",
+            {"email": "alice@example.com"},
+        )
+
+        self.assertEqual(status, 200)
+        self.assertIn("If an account exists", json.loads(data)["message"])
+        self.assertEqual(len(self.sent_reset_emails), 1)
+        email, link = self.sent_reset_emails[0]
+        self.assertEqual(email, "alice@example.com")
+        self.assertIn("token=", link)
+
+    def test_forgot_password_200_unknown_user_no_email(self) -> None:
+        status, data = _request(
+            "POST",
+            "/auth/forgot-password",
+            {"email": "nobody@example.com"},
+        )
+
+        self.assertEqual(status, 200)
+        self.assertIn("If an account exists", json.loads(data)["message"])
+        self.assertEqual(self.sent_reset_emails, [])
+
+    def test_forgot_password_200_malformed_request_without_enumeration(self) -> None:
+        status, data = _request(
+            "POST",
+            "/auth/forgot-password",
+            {"email": "not-an-email"},
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("If an account exists", json.loads(data)["message"])
+
+        status, data = _request("POST", "/auth/forgot-password", None)
+        self.assertEqual(status, 200)
+        self.assertIn("If an account exists", json.loads(data)["message"])
+
+    # ==============================================================
+    # POST /auth/reset-password
+    # ==============================================================
+
+    def test_reset_password_200_then_token_is_reused_400(self) -> None:
+        _request("POST", "/users", _VALID_PAYLOAD)
+        _request(
+            "POST",
+            "/auth/forgot-password",
+            {"email": "alice@example.com"},
+        )
+        link = self.sent_reset_emails[0][1]
+        token = link.split("token=", 1)[1]
+
+        status, data = _request(
+            "POST",
+            "/auth/reset-password",
+            {"token": token, "new_password": "new-secret123"},
+        )
+        self.assertEqual(status, 200)
+
+        login_status, _ = _request(
+            "POST",
+            "/auth/login",
+            {"email": "alice@example.com", "password": "new-secret123"},
+        )
+        self.assertEqual(login_status, 200)
+
+        reused_status, reused_data = _request(
+            "POST",
+            "/auth/reset-password",
+            {"token": token, "new_password": "another-secret123"},
+        )
+        self.assertEqual(reused_status, 400)
+        self.assertIn("invalid", json.loads(reused_data)["error"].lower())
+
+    def test_reset_password_400_invalid_token(self) -> None:
+        status, data = _request(
+            "POST",
+            "/auth/reset-password",
+            {"token": "invalid.jwt.token", "new_password": "new-secret123"},
+        )
+        self.assertEqual(status, 400)
+        self.assertIn("invalid", json.loads(data)["error"].lower())
+
+    def test_reset_password_400_expired_token(self) -> None:
+        _request("POST", "/users", _VALID_PAYLOAD)
+        user = UserHandler.user_service.get_user_by_email("alice@example.com")
+        self.assertIsNotNone(user)
+        expired_token = UserHandler.password_reset_service.create_token(
+            user["id"],
+            expiry_minutes=-1,
+        )
+
+        status, data = _request(
+            "POST",
+            "/auth/reset-password",
+            {"token": expired_token, "new_password": "new-secret123"},
+        )
+        self.assertEqual(status, 400)
+        self.assertIn("expired", json.loads(data)["error"].lower())
+
+    # ==============================================================
+    # POST /auth/change-password
+    # ==============================================================
+
+    def test_change_password_200(self) -> None:
+        _, resp = _request("POST", "/users", _VALID_PAYLOAD)
+        uid = json.loads(resp)["user"]["id"]
+        token = _token_for(uid)
+
+        status, data = _request(
+            "POST",
+            "/auth/change-password",
+            {"current_password": "secret123", "new_password": "changed-secret123"},
+            token=token,
+        )
+        self.assertEqual(status, 200)
+        self.assertIn("changed", json.loads(data)["message"].lower())
+
+        login_status, _ = _request(
+            "POST",
+            "/auth/login",
+            {"email": "alice@example.com", "password": "changed-secret123"},
+        )
+        self.assertEqual(login_status, 200)
+
+    def test_change_password_400_wrong_current_password(self) -> None:
+        _, resp = _request("POST", "/users", _VALID_PAYLOAD)
+        uid = json.loads(resp)["user"]["id"]
+
+        status, data = _request(
+            "POST",
+            "/auth/change-password",
+            {"current_password": "wrong-password", "new_password": "changed-secret123"},
+            token=_token_for(uid),
+        )
+        self.assertEqual(status, 400)
+        self.assertIn("incorrect", json.loads(data)["error"].lower())
+
+    def test_change_password_401_missing_session(self) -> None:
+        status, _ = _request(
+            "POST",
+            "/auth/change-password",
+            {"current_password": "secret123", "new_password": "changed-secret123"},
+        )
+        self.assertEqual(status, 401)
 
     # ==============================================================
     # GET /auth/me

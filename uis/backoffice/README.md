@@ -6,6 +6,8 @@ Internal Next.js application for the Talent Pipeline and Business Model candidat
 
 - `/` — Talent Pipeline and candidate search.
 - `/candidates/new` and `/candidates/[id]` — candidate creation and profile workflows.
+- `/login`, `/register`, `/forgot-password`, and `/reset-password` — account authentication and password recovery flows.
+- `/account/profile` and `/account/change-password` — authenticated profile and password management.
 - `/business-model` — sample candidate filters, searches, sorting, scoring, ranking, and selection reports.
 - `/incidents` — privacy-safe support-ticket CSV upload, quality checks, category/status visualizations, and aggregate export.
 - `/suppliers` — searchable/filterable Supplier Directory with rate and status controls.

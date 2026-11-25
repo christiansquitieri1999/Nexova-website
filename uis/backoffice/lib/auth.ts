@@ -47,6 +47,20 @@ export interface CurrentUserResponse {
   profile: ProfileData | null;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  new_password: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
 // ---------------------------------------------------------------------------
 // Token helpers
 // ---------------------------------------------------------------------------
@@ -119,7 +133,7 @@ export async function authFetch(
     clearToken();
     const currentPath = window.location.pathname;
     if (currentPath !== "/login" && currentPath !== "/register") {
-      window.location.href = "/login";
+      window.location.replace("/login");
     }
   }
 
@@ -137,6 +151,67 @@ function apiUrl(path: string): string {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function responseError(body: unknown, fallback: string): string {
+  if (isObject(body)) {
+    if (typeof body.error === "string") return body.error;
+    if (typeof body.detail === "string") return body.detail;
+  }
+  return fallback;
+}
+
+/** Request a password reset email. */
+export async function forgotPassword(
+  payload: ForgotPasswordPayload,
+): Promise<void> {
+  const response = await fetch(apiUrl("/auth/forgot-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const body: unknown = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(responseError(body, "Could not process the request."));
+  }
+}
+
+/** Reset a password using a signed reset token. */
+export async function resetPassword(
+  payload: ResetPasswordPayload,
+): Promise<void> {
+  const response = await fetch(apiUrl("/auth/reset-password"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const body: unknown = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      responseError(body, "This reset link is invalid or has expired."),
+    );
+  }
+}
+
+/** Change the password of the authenticated user. */
+export async function changePassword(
+  payload: ChangePasswordPayload,
+): Promise<void> {
+  const response = await authFetch(apiUrl("/auth/change-password"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeaders(),
+    },
+    body: JSON.stringify(payload),
+  });
+  const body: unknown = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(responseError(body, "Could not change the password."));
+  }
 }
 
 /** Authenticate with email + password, store the returned token. */
