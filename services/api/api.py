@@ -144,13 +144,13 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
     def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
         """Run the named method and catch any unhandled exception.
 
-        Never exposes stack traces to the client. The full traceback is
-        printed to stderr for server-side debugging.
+        Never exposes exception details to the client. A sanitized
+        message is written to stderr for server-side operators.
         """
         try:
             getattr(self, method_name)(*args, **kwargs)
         except Exception:
-            traceback.print_exc()
+            print("Incident Analysis API: unhandled request error.", file=sys.stderr)
             self._send_json(
                 500,
                 {"error": "An unexpected error occurred. Please try again later."},

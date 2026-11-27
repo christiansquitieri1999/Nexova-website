@@ -12,5 +12,7 @@ This folder contains **helper scripts** for the monorepo: development automation
 - Run `python scripts/analyze.py info-nexova/incidents-nexova.csv`.
 - Use `--no-export` to skip the export prompt or `--export output.csv` to write aggregate metrics.
 - Run `python -m unittest discover -s scripts -p "test_*.py"` to verify validation and expected counts.
+- Script failures are reported on stderr with human-readable messages and a non-zero exit code.
+- Network, JSON, CSV, database, and token-file failures must be handled without exposing raw paths or tokens.
 
 > _Spanish version: [README.es.md](./README.es.md)._

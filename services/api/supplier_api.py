@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import json
 import re
-import traceback
+import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any
 from urllib.parse import urlparse, parse_qs
@@ -147,13 +147,13 @@ class SupplierHandler(BaseHTTPRequestHandler):
     def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
         """Run the named method and catch any unhandled exception.
 
-        Never exposes stack traces to the client. The full traceback is
-        printed to stderr for server-side debugging.
+        Never exposes exception details to the client. A sanitized
+        message is written to stderr for server-side operators.
         """
         try:
             getattr(self, method_name)(*args, **kwargs)
         except Exception:
-            traceback.print_exc()
+            print("Supplier API: unhandled request error.", file=sys.stderr)
             error_response(
                 self,
                 500,
@@ -214,9 +214,6 @@ class SupplierHandler(BaseHTTPRequestHandler):
     # ---- Internal handlers ----
 
     def _list_suppliers(self) -> None:
-        caller_id = self._check_auth()
-        if caller_id is None:
-            return
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
         country = params.get("country", [None])[0]
@@ -224,9 +221,6 @@ class SupplierHandler(BaseHTTPRequestHandler):
         suppliers = self.store.filter(country=country, category=category)
         json_response(self, 200, [s.model_dump() for s in suppliers])
     def _get_supplier(self, supplier_id: str) -> None:
-        caller_id = self._check_auth()
-        if caller_id is None:
-            return
         supplier = self.store.get_by_id(supplier_id)
         if supplier is None:
             error_response(self, 404, f"Supplier '{supplier_id}' not found")

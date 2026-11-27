@@ -12,3 +12,5 @@ Esta carpeta contiene **scripts auxiliares** del monorepo: automatizaciones de d
 - Ejecuta `python scripts/analyze.py info-nexova/incidents-nexova.csv`.
 - Usa `--no-export` para omitir la pregunta de exportación o `--export output.csv` para guardar solo métricas agregadas.
 - Ejecuta `python -m unittest discover -s scripts -p "test_*.py"` para verificar validación y recuentos esperados.
+- Los fallos de los scripts se muestran en stderr con mensajes legibles y un código de salida distinto de cero.
+- Los errores de red, JSON, CSV, base de datos y archivo de token se gestionan sin exponer rutas internas ni tokens.

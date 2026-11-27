@@ -284,11 +284,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with args.csv_file.open("r", encoding="utf-8-sig", newline="") as source:
             result = analyze_stream(source, args.csv_file.name)
-    except (OSError, UnicodeError) as error:
-        print(f"Unable to read CSV: {error}", file=sys.stderr)
+    except (OSError, UnicodeError):
+        print("Unable to read the CSV. Check that it exists and is readable.", file=sys.stderr)
         return 1
     except AnalysisError as error:
-        print(f"Unable to analyze CSV: {error}", file=sys.stderr)
+        message = str(error).replace(str(args.csv_file), "the selected CSV")
+        print(f"Unable to analyze CSV: {message}", file=sys.stderr)
         return 2
 
     print(format_report(result))
@@ -304,10 +305,10 @@ def main(argv: list[str] | None = None) -> int:
     if export_path is not None:
         try:
             export_metrics(result, export_path)
-        except OSError as error:
-            print(f"Unable to export CSV: {error}", file=sys.stderr)
+        except OSError:
+            print("Unable to export the aggregate metrics CSV.", file=sys.stderr)
             return 3
-        print(f"Aggregate metrics exported to {export_path}")
+        print("Aggregate metrics exported successfully.")
     return 0
 
 

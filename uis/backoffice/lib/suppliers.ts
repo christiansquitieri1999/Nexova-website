@@ -15,6 +15,7 @@ import type {
   SupplierRecord,
 } from "@/types/suppliers";
 import { authHeaders, authFetch } from "@/lib/auth";
+import { fetchSafely, readJsonSafely } from "@/lib/api-error";
 
 const DEFAULT_API_URL = "http://127.0.0.1:8001";
 
@@ -59,12 +60,12 @@ export async function getSuppliers(options?: {
   const query = params.toString();
   const url = apiUrl(`/suppliers${query ? `?${query}` : ""}`);
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetchSafely(url, { cache: "no-store" }, "The supplier directory is temporarily unavailable.");
   if (!response.ok) {
-    throw new Error(`Could not load suppliers (HTTP ${response.status}).`);
+    throw new Error("Could not load suppliers.");
   }
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The supplier directory returned an invalid response.");
   if (!Array.isArray(body)) {
     throw new Error("The supplier API returned an invalid response.");
   }
@@ -74,15 +75,15 @@ export async function getSuppliers(options?: {
 
 /** Fetch a single supplier by ID. */
 export async function getSupplier(id: string): Promise<SupplierRecord | null> {
-  const response = await fetch(apiUrl(`/suppliers/${encodeURIComponent(id)}`), {
+  const response = await fetchSafely(apiUrl(`/suppliers/${encodeURIComponent(id)}`), {
     cache: "no-store",
-  });
+  }, "The supplier directory is temporarily unavailable.");
   if (response.status === 404) return null;
   if (!response.ok) {
-    throw new Error(`Could not load supplier (HTTP ${response.status}).`);
+    throw new Error("Could not load supplier.");
   }
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The supplier service returned an invalid response.");
   if (!isObject(body)) {
     throw new Error("The supplier API returned an invalid response.");
   }
@@ -100,7 +101,7 @@ export async function createSupplier(
     body: JSON.stringify(data),
   });
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The supplier service returned an invalid response.");
 
   if (response.status === 422) {
     const errBody = isObject(body) ? body : {};
@@ -122,7 +123,7 @@ export async function createSupplier(
     const message =
       isObject(body) && typeof body.error === "string"
         ? body.error
-        : `Could not create supplier (HTTP ${response.status}).`;
+        : "Could not create supplier.";
     throw new Error(message);
   }
 
@@ -150,7 +151,7 @@ export async function updateSupplierRate(
     },
   );
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The supplier service returned an invalid response.");
 
   if (response.status === 422) {
     const msg =
@@ -164,7 +165,7 @@ export async function updateSupplierRate(
     const message =
       isObject(body) && typeof body.error === "string"
         ? body.error
-        : `Could not update rate (HTTP ${response.status}).`;
+        : "Could not update rate.";
     throw new Error(message);
   }
 
@@ -189,7 +190,7 @@ export async function updateSupplierStatus(
     },
   );
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The supplier service returned an invalid response.");
 
   if (response.status === 422) {
     const msg =
@@ -203,7 +204,7 @@ export async function updateSupplierStatus(
     const message =
       isObject(body) && typeof body.error === "string"
         ? body.error
-        : `Could not update status (HTTP ${response.status}).`;
+        : "Could not update status.";
     throw new Error(message);
   }
 
@@ -226,7 +227,7 @@ export async function deleteSupplier(id: string): Promise<void> {
     const message =
       isObject(body) && typeof body.error === "string"
         ? body.error
-        : `Could not delete supplier (HTTP ${response.status}).`;
+        : "Could not delete supplier.";
     throw new Error(message);
   }
 }

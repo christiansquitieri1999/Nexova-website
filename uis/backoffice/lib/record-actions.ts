@@ -6,6 +6,7 @@ import type {
   CandidatePatchData,
   CandidateRecord,
 } from "@/types/records";
+import { fetchSafely, readJsonSafely } from "@/lib/api-error";
 
 const DEFAULT_API_URL = "https://playground.4geeks.com/tracker/api/v1";
 
@@ -53,7 +54,7 @@ async function ensureSuccess(response: Response) {
     }
   }
 
-  throw new Error(`Could not save the candidate (HTTP ${response.status}). Please check the entered information and try again.`);
+  throw new Error("Could not save the candidate. Please check the entered information and try again.");
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -74,14 +75,14 @@ const FIELD_LABELS: Record<string, string> = {
 export async function createRecord(
   data: CandidateFormData,
 ): Promise<CandidateRecord> {
-  const response = await fetch(apiUrl("/records"), {
+  const response = await fetchSafely(apiUrl("/records"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  });
+  }, "The candidate service is temporarily unavailable.");
   await ensureSuccess(response);
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The candidate service returned an invalid response.");
   const candidate = isObject(body) && "data" in body ? body.data : body;
   if (!isCandidateRecord(candidate)) {
     throw new Error("The API returned an unexpected shape after creating the candidate.");
@@ -94,14 +95,14 @@ export async function updateRecord(
   id: string,
   data: CandidateFormData,
 ): Promise<CandidateRecord> {
-  const response = await fetch(apiUrl(`/records/${encodeURIComponent(id)}`), {
+  const response = await fetchSafely(apiUrl(`/records/${encodeURIComponent(id)}`), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  });
+  }, "The candidate service is temporarily unavailable.");
   await ensureSuccess(response);
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The candidate service returned an invalid response.");
   const candidate = isObject(body) && "data" in body ? body.data : body;
   if (!isCandidateRecord(candidate)) {
     throw new Error("The API returned an unexpected shape after updating the candidate.");
@@ -113,22 +114,23 @@ export async function patchCandidate(
   id: string,
   data: CandidatePatchData,
 ): Promise<void> {
-  const response = await fetch(apiUrl(`/records/${encodeURIComponent(id)}`), {
+  const response = await fetchSafely(apiUrl(`/records/${encodeURIComponent(id)}`), {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
-  });
+  }, "The candidate service is temporarily unavailable.");
   await ensureSuccess(response);
 }
 
 export async function getCandidateNotesFromApi(id: string): Promise<CandidateNote[]> {
-  const response = await fetch(
+  const response = await fetchSafely(
     apiUrl(`/records/${encodeURIComponent(id)}/notes`),
     { cache: "no-store" },
+    "The candidate notes service is temporarily unavailable.",
   );
   await ensureSuccess(response);
 
-  const result: unknown = await response.json();
+  const result: unknown = await readJsonSafely(response, "The candidate notes returned an invalid response.");
   if (!isObject(result) || !Array.isArray(result.data)) {
     throw new Error("The API returned an invalid notes list.");
   }
@@ -148,11 +150,11 @@ export async function createCandidateNote(
   content: string,
 ): Promise<CandidateNote | null> {
   const payload: CandidateNoteInput = { content };
-  const response = await fetch(apiUrl(`/records/${encodeURIComponent(id)}/notes`), {
+  const response = await fetchSafely(apiUrl(`/records/${encodeURIComponent(id)}/notes`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  });
+  }, "The candidate notes service is temporarily unavailable.");
   await ensureSuccess(response);
   const body = await response.text();
   if (!body) return null;
@@ -171,9 +173,10 @@ export async function createCandidateNote(
 }
 
 export async function deleteCandidateNote(id: string, noteId: string) {
-  const response = await fetch(
+  const response = await fetchSafely(
     apiUrl(`/records/${encodeURIComponent(id)}/notes/${encodeURIComponent(noteId)}`),
     { method: "DELETE" },
+    "The candidate notes service is temporarily unavailable.",
   );
   await ensureSuccess(response);
 }

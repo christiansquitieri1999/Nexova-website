@@ -99,12 +99,12 @@ function ApiError({
         </button>
       )}
       <div className="mt-3">
-        <a
+        <Link
           href="/"
           className="text-sm font-medium text-red-800 underline decoration-red-300 underline-offset-2 hover:decoration-red-500"
         >
           Back to home
-        </a>
+        </Link>
       </div>
     </div>
   );
