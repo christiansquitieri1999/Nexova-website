@@ -12,7 +12,7 @@ from analyze import (
 )
 
 
-FIXTURE = Path(__file__).with_name("incidents-nexova.csv")
+FIXTURE = Path(__file__).resolve().parents[1] / "info-nexova" / "incidents-nexova.csv"
 
 
 class IncidentAnalysisTests(unittest.TestCase):

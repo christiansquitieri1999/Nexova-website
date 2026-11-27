@@ -9,7 +9,7 @@ This folder contains **helper scripts** for the monorepo: development automation
 
 - `analyze.py` validates and summarizes support-ticket CSV files without returning customer email addresses.
 - `incidents-nexova.csv` is the provided 100-record acceptance-test dataset.
-- Run `python scripts/analyze.py scripts/incidents-nexova.csv`.
+- Run `python scripts/analyze.py info-nexova/incidents-nexova.csv`.
 - Use `--no-export` to skip the export prompt or `--export output.csv` to write aggregate metrics.
 - Run `python -m unittest discover -s scripts -p "test_*.py"` to verify validation and expected counts.
 

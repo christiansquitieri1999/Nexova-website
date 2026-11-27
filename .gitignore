@@ -18,6 +18,17 @@ node_modules/
 # TinyDB data files (auto-generated per environment)
 services/api/db/*.json
 
+# Sensitive / local
+.env.local
+nexova_token.txt
+services/api/db/incidents_ticket_ids.txt
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
 # OS
 .DS_Store
 Thumbs.db
