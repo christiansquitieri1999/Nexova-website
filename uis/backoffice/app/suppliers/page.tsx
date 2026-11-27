@@ -19,6 +19,26 @@ import {
 } from "@/lib/suppliers";
 
 // ---------------------------------------------------------------------------
+// Human-readable error map
+// ---------------------------------------------------------------------------
+
+const HUMAN_ERRORS: Record<string, string> = {
+  "Could not load suppliers": "The supplier directory is temporarily unavailable.",
+  "Could not update rate": "We could not update the monthly rate. Please try again.",
+  "Could not update status": "We could not update the supplier status. Please try again.",
+  "Could not delete supplier": "We could not delete the supplier. Please try again.",
+  "Unexpected error": "Something unexpected happened. Please try again or contact support.",
+  "Monthly rate must be a positive": "The monthly rate must be a positive number.",
+};
+
+function toHumanError(raw: string): string {
+  for (const [key, human] of Object.entries(HUMAN_ERRORS)) {
+    if (raw.includes(key)) return human;
+  }
+  return "Something unexpected happened. Please try again or contact support.";
+}
+
+// ---------------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------------
 
@@ -111,9 +131,10 @@ export default function SuppliersPage() {
       });
       dispatch({ kind: "set-suppliers", suppliers });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
-        error: caught instanceof Error ? caught.message : "Unexpected error.",
+            error: raw ? toHumanError(raw) : "The supplier directory is temporarily unavailable.",
       });
     } finally {
       dispatch({ kind: "set-loading", loading: false });
@@ -130,9 +151,10 @@ export default function SuppliersPage() {
         const updated = await updateSupplierStatus(supplier.id, newStatus);
       dispatch({ kind: "update-supplier", supplier: updated });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
-        error: caught instanceof Error ? caught.message : "Could not update status.",
+            error: raw ? toHumanError(raw) : "We could not update the supplier status. Please try again.",
       });
     }
   }
@@ -142,7 +164,7 @@ export default function SuppliersPage() {
     if (isNaN(rate) || rate <= 0) {
       dispatch({
         kind: "set-error",
-        error: "Monthly rate must be a positive number.",
+            error: "The monthly rate must be a positive number.",
       });
       return;
     }
@@ -150,9 +172,10 @@ export default function SuppliersPage() {
         const updated = await updateSupplierRate(supplierId, rate);
       dispatch({ kind: "update-supplier", supplier: updated });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
-        error: caught instanceof Error ? caught.message : "Could not update rate.",
+            error: raw ? toHumanError(raw) : "We could not update the monthly rate. Please try again.",
       });
     }
   }
@@ -163,9 +186,10 @@ export default function SuppliersPage() {
       await deleteSupplier(supplierId);
       dispatch({ kind: "remove-supplier", id: supplierId });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
-        error: caught instanceof Error ? caught.message : "Could not delete supplier.",
+            error: raw ? toHumanError(raw) : "We could not delete the supplier. Please try again.",
       });
     }
   }
@@ -283,9 +307,16 @@ export default function SuppliersPage() {
       {state.error && (
         <div
           role="alert"
-          className="mx-auto mt-6 max-w-7xl rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm font-semibold text-red-900"
+                className="mx-auto mt-6 max-w-7xl rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-center"
         >
-          {state.error}
+                <p className="text-sm font-semibold text-red-900">{state.error}</p>
+                <button
+                  type="button"
+                  onClick={loadSuppliers}
+                  className="mt-3 rounded-md bg-red-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-800"
+                >
+                  Retry
+                </button>
         </div>
       )}
 

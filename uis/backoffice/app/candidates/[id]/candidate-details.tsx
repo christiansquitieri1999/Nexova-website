@@ -38,6 +38,19 @@ const STAGE_OPTIONS: CandidateStage[] = [
   "offer_presented",
 ];
 
+const HUMAN_ERROR_MESSAGES: Record<string, string> = {
+  "Could not update this professional profile": "Something went wrong while updating the profile. Please try again.",
+  "Could not add note": "We could not save your note. Please try again.",
+  "Could not delete note": "We could not delete the note. Please try again.",
+};
+
+function toHumanError(raw: string): string {
+  for (const [key, human] of Object.entries(HUMAN_ERROR_MESSAGES)) {
+    if (raw.includes(key)) return human;
+  }
+  return "Something unexpected happened. Please try again or contact support.";
+}
+
 function formatDate(value: unknown) {
   if (typeof value !== "string" || value.length === 0) return "Not provided";
   const date = new Date(value);
@@ -97,7 +110,8 @@ export default function CandidateDetails({
       }
       router.refresh();
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not update this professional profile.");
+          const raw = requestError instanceof Error ? requestError.message : "";
+          setError(raw ? toHumanError(raw) : "Could not update this professional profile. Please try again.");
     } finally {
       setSavingField(null);
     }
@@ -122,7 +136,8 @@ export default function CandidateDetails({
       setNoteLoadFailed(false);
       setNotice("Note added.");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not add note.");
+          const raw = requestError instanceof Error ? requestError.message : "";
+          setError(raw ? toHumanError(raw) : "Could not add note. Please try again.");
     } finally {
       setNoteBusy(false);
     }
@@ -140,7 +155,8 @@ export default function CandidateDetails({
       setNotes((current) => current.filter((item) => item.id !== note.id));
       setNotice("Note deleted.");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Could not delete note.");
+          const raw = requestError instanceof Error ? requestError.message : "";
+          setError(raw ? toHumanError(raw) : "Could not delete note. Please try again.");
     } finally {
       setNoteBusy(false);
       setDeletingNoteId(null);
@@ -237,8 +253,28 @@ export default function CandidateDetails({
         </div>
 
         {noteLoadFailed ? (
-          <div role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            Notes could not be loaded. Refresh the page to try again.
+                  <div role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm">
+                    <p className="font-semibold text-red-900">
+                      We could not load the notes for this professional.
+                    </p>
+                    <p className="mt-1 text-red-700">
+                      This may be a temporary connection issue. Try again or contact support if the problem persists.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setNoteLoadFailed(false);
+                        try {
+                          const freshNotes = await getCandidateNotesFromApi(String(candidate.id));
+                          setNotes(freshNotes);
+                        } catch {
+                          setNoteLoadFailed(true);
+                        }
+                      }}
+                      className="mt-3 rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/40"
+                    >
+                      Retry loading notes
+                    </button>
           </div>
         ) : notes.length === 0 ? (
           <p className="mb-5 rounded-lg border border-zinc-200 bg-white p-5 text-sm text-zinc-600">No notes yet.</p>

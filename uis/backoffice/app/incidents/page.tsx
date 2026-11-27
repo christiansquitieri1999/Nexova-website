@@ -54,6 +54,18 @@ function badge(text: string, colorClass: string) {
   );
 }
 
+const HUMAN_ERRORS: Record<string, string> = {
+  "Could not load incidents": "The incident list is temporarily unavailable.",
+  "Could not load summary": "The incident summary is temporarily unavailable.",
+};
+
+function toHumanError(raw: string): string {
+  for (const [key, human] of Object.entries(HUMAN_ERRORS)) {
+    if (raw.includes(key)) return human;
+  }
+  return "Something unexpected happened. Please try again or contact support.";
+}
+
 function LoadingBox({ label }: { label: string }) {
   return (
     <div
@@ -86,6 +98,14 @@ function ApiError({
           Retry
         </button>
       )}
+      <div className="mt-3">
+        <a
+          href="/"
+          className="text-sm font-medium text-red-800 underline decoration-red-300 underline-offset-2 hover:decoration-red-500"
+        >
+          Back to home
+        </a>
+      </div>
     </div>
   );
 }
@@ -465,12 +485,11 @@ function ListPanel() {
       });
       dispatch({ kind: "set-incidents", incidents });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
         error:
-          caught instanceof Error
-            ? caught.message
-            : "Could not load incidents.",
+              raw ? toHumanError(raw) : "Could not load incidents. Please try again.",
       });
     } finally {
       dispatch({ kind: "set-loading", loading: false });
@@ -506,7 +525,7 @@ function ListPanel() {
       dispatch({
         kind: "set-notification",
         message:
-          "Status update failed. The previous status has been restored.",
+              "Status update failed. The previous status has been restored. Please try again.",
       });
     } finally {
       dispatch({ kind: "set-updating", id: null });
@@ -783,12 +802,11 @@ function SummaryPanel() {
       const summary = await getIncidentSummary();
       dispatch({ kind: "set-summary", summary });
     } catch (caught) {
+          const raw = caught instanceof Error ? caught.message : "";
       dispatch({
         kind: "set-error",
         error:
-          caught instanceof Error
-            ? caught.message
-            : "Could not load summary.",
+              raw ? toHumanError(raw) : "Could not load summary. Please try again.",
       });
     } finally {
       dispatch({ kind: "set-loading", loading: false });

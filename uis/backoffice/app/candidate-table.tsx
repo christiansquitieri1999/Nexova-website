@@ -17,7 +17,7 @@ type Props = {
 };
 
 function displayName(candidate: CandidateRecord): string {
-  return candidate.full_name;
+  return candidate?.full_name ?? "Unnamed professional";
 }
 
 function statusColor(status: CandidateStatus): string {
@@ -66,6 +66,7 @@ export default function CandidateTable({ candidates }: Props) {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return candidates.filter((c) => {
+        if (!c) return false;
       // status filter
       const statusVal = String(c.status ?? "").toLowerCase();
       if (currentStatus && statusVal !== currentStatus.toLowerCase()) {
@@ -206,20 +207,20 @@ export default function CandidateTable({ candidates }: Props) {
                         {displayName(candidate)}
                       </Link>
                       <p className="mt-1 text-xs text-zinc-500">
-                        {candidate.email}
+                                            {candidate?.email ?? "—"}
                       </p>
                     </td>
                     <td className="px-5 py-4 text-zinc-700">
-                      {candidate.position}
+                                          {candidate?.position ?? "Unknown role"}
                     </td>
                     <td className="px-5 py-4 text-zinc-700">
-                      {STAGE_LABELS[candidate.stage]}
+                                          {STAGE_LABELS[candidate?.stage] ?? candidate?.stage ?? "—"}
                     </td>
                     <td className="px-5 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(candidate.status)}`}
+                                            className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(candidate?.status)}`}
                       >
-                        {STATUS_LABELS[candidate.status]}
+                                            {STATUS_LABELS[candidate?.status] ?? candidate?.status ?? "Unknown"}
                       </span>
                     </td>
                     <td className="px-5 py-4 text-right">
@@ -260,20 +261,20 @@ export default function CandidateTable({ candidates }: Props) {
                     >
                       {displayName(candidate)}
                     </Link>
-                    <p className="mt-1 break-all text-xs text-zinc-500">{candidate.email}</p>
+                                  <p className="mt-1 break-all text-xs text-zinc-500">{candidate?.email ?? "—"}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(candidate.status)}`}>
-                    {STATUS_LABELS[candidate.status]}
+                                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${statusColor(candidate?.status)}`}>
+                                  {STATUS_LABELS[candidate?.status] ?? candidate?.status ?? "Unknown"}
                   </span>
                 </div>
                 <dl className="grid grid-cols-2 gap-3 text-xs">
                   <div className="min-w-0">
                     <dt className="font-medium text-zinc-500">Role</dt>
-                    <dd className="mt-1 break-words text-zinc-800">{candidate.position}</dd>
+                                  <dd className="mt-1 break-words text-zinc-800">{candidate?.position ?? "Unknown role"}</dd>
                   </div>
                   <div className="min-w-0">
                     <dt className="font-medium text-zinc-500">Process stage</dt>
-                    <dd className="mt-1 break-words text-zinc-800">{STAGE_LABELS[candidate.stage]}</dd>
+                                  <dd className="mt-1 break-words text-zinc-800">{STAGE_LABELS[candidate?.stage] ?? candidate?.stage ?? "—"}</dd>
                   </div>
                 </dl>
                 <Link
@@ -287,7 +288,7 @@ export default function CandidateTable({ candidates }: Props) {
             ))}
           </div>
           <p className="border-t border-zinc-100 px-5 py-3 text-xs text-zinc-500">
-            Showing {filtered.length} of {candidates.length} professionals
+                      Showing {filtered.length} of {candidates?.length ?? 0} professionals
           </p>
         </div>
       )}
