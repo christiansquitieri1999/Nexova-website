@@ -26,9 +26,12 @@ from auth_service import UserService
 
 load_dotenv()
 
-_SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
 _ALGORITHM = "HS256"
 _DEFAULT_EXPIRE_MINUTES = 30
+
+
+def _get_secret_key() -> str:
+    return os.environ.get("SECRET_KEY", "").strip()
 
 
 def _get_expire_minutes() -> int:
@@ -57,7 +60,10 @@ def create_access_token(user_id: str) -> str:
         "exp": expire,
         "iat": datetime.now(timezone.utc),
     }
-    return jwt.encode(claims, _SECRET_KEY, algorithm=_ALGORITHM)
+    secret = _get_secret_key()
+    if not secret:
+        raise RuntimeError("SECRET_KEY must be configured")
+    return jwt.encode(claims, secret, algorithm=_ALGORITHM)
 
 
 def decode_access_token(token: str) -> Optional[dict[str, Any]]:
@@ -67,7 +73,10 @@ def decode_access_token(token: str) -> Optional[dict[str, Any]]:
     the token is invalid, expired, or malformed.
     """
     try:
-        payload = jwt.decode(token, _SECRET_KEY, algorithms=[_ALGORITHM])
+        secret = _get_secret_key()
+        if not secret:
+            return None
+        payload = jwt.decode(token, secret, algorithms=[_ALGORITHM])
         return payload
     except JWTError:
         return None

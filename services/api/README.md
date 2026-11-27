@@ -144,6 +144,17 @@ Configure password recovery with these environment variables:
 Add the values to `services/api/.env` locally. Never commit that file or paste API keys into source
 or responses. Use `services/api/.env.example` as the variable-name template.
 
+### Run the User & Profile API
+
+From `services/api/`:
+
+```bash
+uv run uvicorn user_api:app --host 127.0.0.1 --port 8002 --reload
+```
+
+The FastAPI application provides interactive API documentation at
+`http://127.0.0.1:8002/docs`.
+
 ### Seed initial suppliers
 
 From `services/api/`, run the installed `seed` command:
@@ -162,4 +173,6 @@ From `services/api/`:
 
 ```bash
 uv run python -m unittest discover -s . -p "test_*.py"
+uv run pytest
+uv run pytest --cov=auth --cov=auth_models --cov=auth_service --cov=password_reset --cov=profile_models --cov=profile_service --cov-report=term-missing
 ```
