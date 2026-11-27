@@ -10,11 +10,14 @@ requires-python = ">=3.11"
 
 dependencies = [
     "bcrypt>=5.0.0",
+    "fastapi>=0.115",
+    "httpx2>=2.16.2",
     "libpass[bcrypt]>=1.9.5.post0",
     "pydantic>=2.0",
     "python-dotenv>=1.2.4",
     "python-jose[cryptography]>=3.5.0",
     "tinydb>=4.0",
+    "uvicorn>=0.34",
 ]
 
 [tool.setuptools]
@@ -22,6 +25,12 @@ py-modules = ["cli_seed", "supplier_models"]
 
 [tool.uv]
 package = true
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+]
 
 [project.scripts]
 seed = "cli_seed:main"
