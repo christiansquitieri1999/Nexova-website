@@ -69,6 +69,7 @@ The repository is in a **consolidated state** after completing the monorepo-orga
 | Local HTTP endpoint with 5 MB upload limit | ✅ Done |
 | Backoffice upload dashboard and category/status/satisfaction visualizations | ✅ Done |
 | Python and TypeScript tests, lint, typecheck, and production build | ✅ Done |
+| Python script resilience, safe stderr output, and non-zero critical-failure exits | ✅ Done |
 
 ---
 

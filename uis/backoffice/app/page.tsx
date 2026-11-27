@@ -72,6 +72,20 @@ export default async function Home() {
             Professional profiles could not be loaded. Please check the API connection and
             try again.
           </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/"
+              className="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600/40"
+            >
+              Retry
+            </Link>
+            <Link
+              href="/"
+              className="text-sm font-medium text-red-900 underline decoration-red-300 underline-offset-2 hover:decoration-red-500"
+            >
+              Go to home page
+            </Link>
+          </div>
         </div>
       ) : (
         <Suspense>

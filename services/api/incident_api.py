@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 import re
-import traceback
+import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any
 
@@ -174,13 +174,13 @@ class IncidentHandler(BaseHTTPRequestHandler):
     def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
         """Run the named method and catch any unhandled exception.
 
-        Never exposes stack traces to the client. The full traceback is
-        printed to stderr for server-side debugging.
+        Never exposes exception details to the client. A sanitized
+        message is written to stderr for server-side operators.
         """
         try:
             getattr(self, method_name)(*args, **kwargs)
         except Exception:
-            traceback.print_exc()
+            print("Incident Manager API: unhandled request error.", file=sys.stderr)
             error_response(
                 self,
                 500,

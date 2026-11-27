@@ -15,6 +15,7 @@ import type {
   IncidentStatus,
   IncidentSummary,
 } from "@/types/incidents";
+import { fetchSafely, readJsonSafely } from "@/lib/api-error";
 
 const DEFAULT_API_URL = "http://127.0.0.1:8003";
 
@@ -84,7 +85,7 @@ export async function createIncident(
     body: JSON.stringify(data),
   });
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The incident service returned an invalid response.");
 
   if (!response.ok) {
     const fieldErrors = parseFieldErrors(body);
@@ -123,12 +124,12 @@ export async function getIncidents(options?: {
   const query = params.toString();
   const url = apiUrl(`/api/incidents${query ? `?${query}` : ""}`);
 
-  const response = await fetch(url, { cache: "no-store" });
+  const response = await fetchSafely(url, { cache: "no-store" }, "The incident service is temporarily unavailable.");
   if (!response.ok) {
-    throw new Error(`Could not load incidents (HTTP ${response.status}).`);
+    throw new Error("Could not load incidents.");
   }
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The incident service returned an invalid response.");
   if (!Array.isArray(body)) {
     throw new Error("The incident API returned an invalid response.");
   }
@@ -138,16 +139,17 @@ export async function getIncidents(options?: {
 
 /** Fetch a single incident by ID. */
 export async function getIncident(id: string): Promise<IncidentRecord | null> {
-  const response = await fetch(
+  const response = await fetchSafely(
     apiUrl(`/api/incidents/${encodeURIComponent(id)}`),
     { cache: "no-store", headers: { ...authHeaders() } },
+    "The incident service is temporarily unavailable.",
   );
   if (response.status === 404) return null;
   if (!response.ok) {
-    throw new Error(`Could not load incident (HTTP ${response.status}).`);
+    throw new Error("Could not load incident.");
   }
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The incident service returned an invalid response.");
   return isIncidentRecord(body) ? (body as IncidentRecord) : null;
 }
 
@@ -165,7 +167,7 @@ export async function updateIncidentStatus(
     },
   );
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The incident service returned an invalid response.");
 
   if (!response.ok) {
     const fieldErrors = parseFieldErrors(body);
@@ -179,7 +181,7 @@ export async function updateIncidentStatus(
     const message =
       isObject(body) && typeof body.error === "string"
         ? body.error
-        : `Could not update status (HTTP ${response.status}).`;
+        : "Could not update status.";
     throw new Error(message);
   }
 
@@ -192,14 +194,16 @@ export async function updateIncidentStatus(
 
 /** Fetch aggregated summary metrics. */
 export async function getIncidentSummary(): Promise<IncidentSummary> {
-  const response = await fetch(apiUrl("/api/incidents/summary"), {
-    cache: "no-store",
-  });
+  const response = await fetchSafely(
+    apiUrl("/api/incidents/summary"),
+    { cache: "no-store" },
+    "The incident summary is temporarily unavailable.",
+  );
   if (!response.ok) {
-    throw new Error(`Could not load summary (HTTP ${response.status}).`);
+    throw new Error("Could not load summary.");
   }
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The incident summary returned an invalid response.");
   if (!isObject(body)) {
     throw new Error("The incident API returned an invalid response.");
   }

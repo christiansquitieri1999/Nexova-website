@@ -1,248 +1,145 @@
-# BRIEFING — Supplier Directory · Nexova
+# BRIEFING — Centralized Incident Manager · Nexova
 
-_Estas instrucciones también están disponibles en [español](./nexova-BRIEFING.es.md)._
+## Your Company
 
-> **Milestone:** 09 — Lightweight Storage API  
-> **Repository path:** `09-lightweight-storage/nexova-BRIEFING.md`
+**Nexova** is a human resources consulting and talent acquisition firm with **120 employees**, headquartered in Valencia, Spain, with an expansion office in Miami, Florida. It operates across three business lines: executive and mid-management headhunting, customer support team outsourcing for technology companies, and corporate training in soft skills and leadership.
 
----
-
-## Your company
-
-You are part of the AI Engineering team at **Nexova**, a human resources and talent acquisition consultancy headquartered in Valencia (Spain) with an office in Miami (Florida). Your tech lead is **Sergio Molina**, CTO, and the project was requested by **Patricia Solís**, HR Manager, in coordination with the operations area.
-
-Nexova hires external services on a recurring basis: job posting platforms, selection tools, training providers, corporate software, and outsourcing services. Until now, this registry lives in a spreadsheet that Patricia updates manually and shares by email whenever there is a change. The result is multiple versions circulating in parallel with no one knowing which is current. This project creates the official, single source of truth.
+As part of the **Nexova AI Engineering** team, you have been building the internal platform across several milestones. This project integrates a centralized incident manager into that platform. At Nexova, incidents are not just infrastructure failures: they also include complaints from corporate clients, errors in selection processes, and issues from the outsourced support team.
 
 ---
 
-## Supplier model
+## Who Uses It and Why
 
-Each supplier in the Nexova directory has the following structure:
+**Sergio Molina (CTO)** needs centralized visibility into all technical and operational issues that currently arrive by email, Slack, or word of mouth. Without a structured record, he cannot measure or improve resolution times.
 
-| Field                   | Type                                 | Description                                   |
-| ----------------------- | ------------------------------------ | --------------------------------------------- |
-| `name`                  | string, required                     | Supplier or platform trade name               |
-| `country`               | string, required                     | Active contract country: `"Spain"` or `"USA"` |
-| `categories`            | list of strings, required, minimum 1 | Type of service provided (see valid list)     |
-| `monthly_rate`          | float, required, > 0                 | Current monthly cost in the contract currency |
-| `currency`              | string, required                     | `"EUR"` for Spain, `"USD"` for USA            |
-| `updated_at`            | datetime, system-generated           | Timestamp of the last rate update             |
-| `status`                | string, required                     | `"active"` or `"suspended"`                   |
-| `contract_renewal_date` | string, optional                     | Contract renewal date (format `YYYY-MM-DD`)   |
-| `contact_email`         | string, optional                     | Supplier account manager email                |
-| `notes`                 | string, optional                     | Internal notes                                |
+**Roberto Díaz (Customer Support Lead)** manages 30 agents handling incidents for Nexova's clients. They currently work with a legacy helpdesk and no centralized knowledge base. This manager is the first step toward a structured system.
 
-### Valid categories
-
-```python
-VALID_CATEGORIES = [
-    "job_boards",
-    "ats_software",
-    "assessment_tools",
-    "training_platforms",
-    "payroll_and_hr_software",
-    "video_interview",
-    "background_check",
-    "office_and_facilities",
-    "it_and_software_licenses"
-]
-```
-
-### Valid statuses
-
-```python
-VALID_STATUSES = ["active", "suspended"]
-```
+**Laura Mendoza (CEO)** wants to know how many critical incidents are open right now, from which office they originate, and how long they have been unresolved.
 
 ---
 
-## Seeder initial data
+## Nexova Offices
 
-The seeder must load exactly the following suppliers, representing Patricia's current directory state.
+The `branch` field must contain exactly one of the following values:
 
-```python
-SUPPLIERS_SEED = [
-    {
-        "name": "LinkedIn Talent Solutions",
-        "country": "Spain",
-        "categories": ["job_boards"],
-        "monthly_rate": 1200.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-03-31",
-        "contact_email": "account@linkedin.com",
-        "notes": "Corporate license for job posting and candidate search."
-    },
-    {
-        "name": "InfoJobs Premium",
-        "country": "Spain",
-        "categories": ["job_boards"],
-        "monthly_rate": 490.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-06-30",
-        "contact_email": "empresas@infojobs.net"
-    },
-    {
-        "name": "Indeed Sponsored",
-        "country": "USA",
-        "categories": ["job_boards"],
-        "monthly_rate": 850.0,
-        "currency": "USD",
-        "status": "active",
-        "contact_email": "sales@indeed.com",
-        "notes": "Pay-per-click campaigns for customer support profiles in Miami."
-    },
-    {
-        "name": "Workable",
-        "country": "Spain",
-        "categories": ["ats_software"],
-        "monthly_rate": 299.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-09-15",
-        "contact_email": "support@workable.com",
-        "notes": "Primary ATS for the Valencia selection team."
-    },
-    {
-        "name": "Greenhouse",
-        "country": "USA",
-        "categories": ["ats_software"],
-        "monthly_rate": 620.0,
-        "currency": "USD",
-        "status": "suspended",
-        "contact_email": "accounts@greenhouse.io",
-        "notes": "Suspended after non-renewal. Sergio is evaluating migrating everything to Workable."
-    },
-    {
-        "name": "Thomas International",
-        "country": "Spain",
-        "categories": ["assessment_tools"],
-        "monthly_rate": 380.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-12-01",
-        "contact_email": "clientes@thomas.es",
-        "notes": "Personality and aptitude tests for middle-management hiring processes."
-    },
-    {
-        "name": "HireVue",
-        "country": "USA",
-        "categories": ["video_interview"],
-        "monthly_rate": 540.0,
-        "currency": "USD",
-        "status": "active",
-        "contract_renewal_date": "2025-08-31",
-        "contact_email": "support@hirevue.com"
-    },
-    {
-        "name": "Udemy Business",
-        "country": "Spain",
-        "categories": ["training_platforms"],
-        "monthly_rate": 420.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2026-01-15",
-        "contact_email": "business@udemy.com",
-        "notes": "Licenses for the internal team. Managed by Elena Vargas."
-    },
-    {
-        "name": "Coursera for Teams",
-        "country": "USA",
-        "categories": ["training_platforms"],
-        "monthly_rate": 399.0,
-        "currency": "USD",
-        "status": "suspended",
-        "contact_email": "teams@coursera.com",
-        "notes": "Suspended due to low usage. Review before Q4."
-    },
-    {
-        "name": "Sage HR",
-        "country": "Spain",
-        "categories": ["payroll_and_hr_software"],
-        "monthly_rate": 310.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-10-01",
-        "contact_email": "soporte@sage.com",
-        "notes": "Payroll and personnel management software for the Valencia headquarters."
-    },
-    {
-        "name": "Gusto",
-        "country": "USA",
-        "categories": ["payroll_and_hr_software"],
-        "monthly_rate": 280.0,
-        "currency": "USD",
-        "status": "active",
-        "contact_email": "support@gusto.com",
-        "notes": "Payroll management for Miami office employees."
-    },
-    {
-        "name": "Checkr",
-        "country": "USA",
-        "categories": ["background_check"],
-        "monthly_rate": 195.0,
-        "currency": "USD",
-        "status": "active",
-        "contract_renewal_date": "2025-11-30",
-        "contact_email": "sales@checkr.com"
-    },
-    {
-        "name": "Microsoft 365 Business",
-        "country": "Spain",
-        "categories": ["it_and_software_licenses"],
-        "monthly_rate": 760.0,
-        "currency": "EUR",
-        "status": "active",
-        "contact_email": "enterprise@microsoft.com",
-        "notes": "Licenses for the entire Valencia and Miami workforce."
-    },
-    {
-        "name": "Regus Valencia",
-        "country": "Spain",
-        "categories": ["office_and_facilities"],
-        "monthly_rate": 2400.0,
-        "currency": "EUR",
-        "status": "active",
-        "contract_renewal_date": "2025-07-01",
-        "contact_email": "valencia@regus.com",
-        "notes": "Lease for the main Valencia office. Includes meeting room."
-    },
-    {
-        "name": "WeWork Miami",
-        "country": "USA",
-        "categories": ["office_and_facilities"],
-        "monthly_rate": 3100.0,
-        "currency": "USD",
-        "status": "active",
-        "contract_renewal_date": "2025-09-30",
-        "contact_email": "miami@wework.com"
-    }
-]
-```
+| Database value        | Display name             |
+| --------------------- | ------------------------ |
+| `central`             | Central — Valencia HQ    |
+| `valencia_operations` | Valencia — Operations    |
+| `miami_office`        | Miami Office             |
+| `remote`              | Remote (no fixed office) |
+
+Use `central` when the incident has no specific office — for example, `internal` leadership reports or `customer` complaints with no associated office. `central` is Nexova's headquarters in Valencia; do not use a separate headquarters value.
 
 ---
 
-## Business constraints
+## Incident Categories
 
-- **Currency by country:** A supplier from `"Spain"` must have `currency = "EUR"`. A supplier from `"USA"` must have `currency = "USD"`. The API must reject inconsistent combinations.
-- **Rate traceability:** Every update to `monthly_rate` must automatically record `updated_at`. Patricia uses this data to justify budget variations to management.
-- **Upcoming renewals:** The `contract_renewal_date` field is optional but relevant — suppliers with renewal within the next 60 days must be visually highlighted in the frontend.
-- **Controlled suspension:** Suspended suppliers are not deleted. They remain in the directory with `"suspended"` status to preserve commercial relationship history.
+The `category` field must contain exactly one of the following values:
 
----
-
-## What Patricia will see in the frontend
-
-The directory page must allow Patricia to:
-
-1. See all suppliers grouped or filterable by country (Spain / USA).
-2. Filter by category to answer questions like "what active ATS tools do we have?".
-3. Distinguish active suppliers from suspended ones at a glance.
-4. Register a new supplier from a form.
-5. Update a supplier's monthly rate and see the change reflected immediately.
-6. Activate or suspend a supplier with a visible control in each row.
+| Value               | Description                                                               |
+| ------------------- | ------------------------------------------------------------------------- |
+| `technical_failure` | System or technology tool failure (ATS, HubSpot, Zendesk, infrastructure) |
+| `process_error`     | Error in an operational process: selection, onboarding, training, billing |
+| `client_complaint`  | Complaint or claim from a corporate client about the service provided     |
+| `candidate_issue`   | Issue reported by or related to a candidate in a selection process        |
+| `staff_issue`       | Internal HR incident: absence, conflict, accident, sick leave             |
+| `sla_breach`        | Breach of a committed SLA with a client                                   |
+| `data_quality`      | Error or inconsistency in candidate, client, or reporting data            |
+| `other`             | Any incident that does not fit the categories above                       |
 
 ---
 
-_Internal document — 4Geeks Academy · AI Engineering Track_
+## Status and Lifecycle
+
+| Value         | Meaning at Nexova                                                |
+| ------------- | ---------------------------------------------------------------- |
+| `open`        | Incident registered, no owner assigned yet                       |
+| `in_progress` | Assigned to a team or person, actively being handled             |
+| `resolved`    | Resolved and confirmed by the reporter or the responsible person |
+| `discarded`   | Registered in error, duplicate, or out of scope                  |
+
+Valid transitions: `open → in_progress`, `open → discarded`, `in_progress → resolved`, `in_progress → discarded`. The `resolved` and `discarded` states are final.
+
+---
+
+## Origins
+
+| Value      | When to use it at Nexova                                                    |
+| ---------- | --------------------------------------------------------------------------- |
+| `customer` | Reported by a corporate client (a company that contracts Nexova's services) |
+| `branch`   | Reported by staff at one of Nexova's offices                                |
+| `internal` | Detected internally by technology, operations, or leadership                |
+
+---
+
+## Historical Data — Seed from CSV
+
+The CSV file from the **incidents-file-analyzer** project (`incidents-nexova.csv` in `content/contexts/incidents-file-analysis/`) contains incidents exported from the customer support helpdesk. All of them correspond to complaints or issues reported by corporate clients (`origin: "customer"`).
+
+The analyzer CSV schema uses different field names, status values, and category codes than this manager. **Do not insert CSV rows directly.** Reuse the shared validation logic from the analyzer, then apply the transformations below before insert.
+
+**Idempotency identifier:** use `ticket_id` from the CSV to prevent duplicate records. If that field does not exist, use the combination `title + created_at`.
+
+### Direct field mapping
+
+| CSV field     | Model field   | Transformation                                                                   |
+| ------------- | ------------- | -------------------------------------------------------------------------------- |
+| `ticket_id`   | —             | Duplicate control only — not stored                                              |
+| `description` | `title`       | First 120 characters of `description`, trimmed. Discard row if empty after trim  |
+| `description` | `description` | Copy verbatim                                                                    |
+| `date`        | `created_at`  | Parse `YYYY-MM-DD` as midnight UTC. Set `updated_at` to the same value on insert |
+| —             | `origin`      | Always `"customer"` for all seed records                                         |
+| —             | `branch`      | Always `"central"` for all seed records (CSV has no office field)                |
+
+### Status mapping
+
+| CSV `status` | Model `status` |
+| ------------ | -------------- |
+| `OPEN`       | `open`         |
+| `CLOSED`     | `resolved`     |
+| `DISCARDED`  | `discarded`    |
+
+### Category mapping (Nexova)
+
+| CSV `category` | Model `category`    |
+| -------------- | ------------------- |
+| `TECHNICAL`    | `technical_failure` |
+| `BILLING`      | `process_error`     |
+| `ACCESS`       | `technical_failure` |
+| `HR_QUERY`     | `process_error`     |
+| `COMPLAINT`    | `client_complaint`  |
+
+Records that fail validation or cannot be mapped are discarded and reported to the console.
+
+---
+
+## Expected Values After Seeding
+
+Once the CSV is correctly loaded, `/api/incidents/summary` must return totals by **model** `status` and `category` that match the transformed counts below. These correspond to the **96 valid records** from `incidents-nexova.csv` in the analyzer project (invalid rows excluded).
+
+**By model `status`:**
+
+| Model `status` | Count |
+| -------------- | ----- |
+| `open`         | 27    |
+| `resolved`     | 56    |
+| `discarded`    | 13    |
+
+**By model `category`:**
+
+| Model `category`    | Count |
+| ------------------- | ----- |
+| `technical_failure` | 49    |
+| `process_error`     | 35    |
+| `client_complaint`  | 12    |
+
+Cross-check these against your analyzer script output: the raw CSV breakdown uses `OPEN`/`CLOSED`/`DISCARDED` and `TECHNICAL`/`BILLING`/etc. — the seed totals above are the **post-transformation** values your manager must produce.
+
+---
+
+## Implementation Notes
+
+- Nexova operates in two languages: Valencia staff work in Spanish and Miami staff in English. If you implemented bilingual support in previous milestones, the form and error messages must respect that here too.
+- Incidents of type `sla_breach` are critical for Roberto and Laura: although the automatic alert is not part of this project, design the data model so that filter is trivial to add later.
+- The `remote` value in `branch` is common at Nexova — many employees have no fixed office. Make sure it appears clearly in the dropdown and does not create ambiguity with `central` (headquarters) or `valencia_operations` (operations office).

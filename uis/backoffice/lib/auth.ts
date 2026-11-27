@@ -8,6 +8,8 @@
  * (default http://127.0.0.1:8002).
  */
 
+import { fetchSafely, readJsonSafely } from "@/lib/api-error";
+
 export const AUTH_API_URL =
   process.env.NEXT_PUBLIC_AUTH_API_URL ?? "http://127.0.0.1:8002";
 
@@ -127,7 +129,11 @@ export async function authFetch(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {
-  const response = await fetch(input, init);
+  const response = await fetchSafely(
+    input,
+    init,
+    "The authentication service is temporarily unavailable.",
+  );
 
   if (response.status === 401 && typeof window !== "undefined") {
     clearToken();
@@ -165,12 +171,12 @@ function responseError(body: unknown, fallback: string): string {
 export async function forgotPassword(
   payload: ForgotPasswordPayload,
 ): Promise<void> {
-  const response = await fetch(apiUrl("/auth/forgot-password"), {
+  const response = await fetchSafely(apiUrl("/auth/forgot-password"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  });
-  const body: unknown = await response.json().catch(() => null);
+  }, "The password reset service is temporarily unavailable.");
+  const body: unknown = await readJsonSafely(response, "The password reset service returned an invalid response.");
 
   if (!response.ok) {
     throw new Error(responseError(body, "Could not process the request."));
@@ -181,12 +187,12 @@ export async function forgotPassword(
 export async function resetPassword(
   payload: ResetPasswordPayload,
 ): Promise<void> {
-  const response = await fetch(apiUrl("/auth/reset-password"), {
+  const response = await fetchSafely(apiUrl("/auth/reset-password"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  });
-  const body: unknown = await response.json().catch(() => null);
+  }, "The password reset service is temporarily unavailable.");
+  const body: unknown = await readJsonSafely(response, "The password reset link response was invalid.");
 
   if (!response.ok) {
     throw new Error(
@@ -216,13 +222,13 @@ export async function changePassword(
 
 /** Authenticate with email + password, store the returned token. */
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await fetch(apiUrl("/auth/login"), {
+  const response = await fetchSafely(apiUrl("/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
-  });
+  }, "The authentication service is temporarily unavailable.");
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(response, "The authentication service returned an invalid response.");
 
   if (!response.ok) {
     const message =
@@ -247,13 +253,13 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
 /** Register a new user, then automatically log in. */
 export async function register(payload: RegisterPayload): Promise<LoginResponse> {
   // 1. Create the user
-  const createResponse = await fetch(apiUrl("/users"), {
+  const createResponse = await fetchSafely(apiUrl("/users"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: payload.email, password: payload.password }),
-  });
+  }, "The registration service is temporarily unavailable.");
 
-  const createBody: unknown = await createResponse.json();
+  const createBody: unknown = await readJsonSafely(createResponse, "The registration service returned an invalid response.");
 
   if (!createResponse.ok) {
     const message =
@@ -271,7 +277,7 @@ export async function register(payload: RegisterPayload): Promise<LoginResponse>
 
   // 3. If profile fields were provided, update profile (now we have a token)
   if (payload.name || payload.phone || payload.address) {
-    await fetch(apiUrl("/profiles/me"), {
+    await fetchSafely(apiUrl("/profiles/me"), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -282,9 +288,7 @@ export async function register(payload: RegisterPayload): Promise<LoginResponse>
         phone: payload.phone ?? "",
         address: payload.address ?? "",
       }),
-    }).catch(() => {
-      // Profile update is best-effort during registration
-    });
+    }, "The account profile update could not be completed.").catch(() => undefined);
   }
 
   return loginResult;
@@ -295,9 +299,9 @@ export async function getCurrentUser(): Promise<CurrentUserResponse | null> {
   const token = getToken();
   if (!token) return null;
 
-  const response = await fetch(apiUrl("/auth/me"), {
+  const response = await fetchSafely(apiUrl("/auth/me"), {
     headers: { Authorization: `Bearer ${token}` },
-  });
+  }, "The account service is temporarily unavailable.");
 
   if (response.status === 401) {
     clearToken();
@@ -306,7 +310,10 @@ export async function getCurrentUser(): Promise<CurrentUserResponse | null> {
 
   if (!response.ok) return null;
 
-  const body: unknown = await response.json();
+  const body: unknown = await readJsonSafely(
+    response,
+    "The account service returned an invalid response.",
+  );
   if (!isObject(body) || typeof body.email !== "string") return null;
 
   return {

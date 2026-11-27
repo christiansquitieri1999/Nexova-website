@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sys
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Optional
 
@@ -146,9 +147,32 @@ class UserHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
 
+
+    # ---- Unhandled exception guard ----
+
+    def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
+        """Run the named method and catch any unhandled exception.
+
+        Never exposes exception details to the client. A sanitized
+        message is written to stderr for server-side operators.
+        """
+        try:
+            getattr(self, method_name)(*args, **kwargs)
+        except Exception:
+            print("User API: unhandled request error.", file=sys.stderr)
+            error_response(
+                self,
+                500,
+                "An unexpected error occurred. Please try again later.",
+            )
+
+
     # ---- GET ----
 
     def do_GET(self) -> None:
+        self._safe_dispatch("_do_get")
+
+    def _do_get(self) -> None:
         path = self.path.split("?")[0]
 
         # GET /auth/me
@@ -176,6 +200,9 @@ class UserHandler(BaseHTTPRequestHandler):
     # ---- POST ----
 
     def do_POST(self) -> None:
+        self._safe_dispatch("_do_post")
+
+    def _do_post(self) -> None:
         path = self.path
 
         # POST /auth/login
@@ -201,6 +228,9 @@ class UserHandler(BaseHTTPRequestHandler):
     # ---- PUT ----
 
     def do_PUT(self) -> None:
+        self._safe_dispatch("_do_put")
+
+    def _do_put(self) -> None:
         path = self.path
 
         # PUT /users/{id}
@@ -218,6 +248,9 @@ class UserHandler(BaseHTTPRequestHandler):
     # ---- DELETE ----
 
     def do_DELETE(self) -> None:
+        self._safe_dispatch("_do_delete")
+
+    def _do_delete(self) -> None:
         path = self.path
 
         m = _PATH_RE_USER_ID.match(path)

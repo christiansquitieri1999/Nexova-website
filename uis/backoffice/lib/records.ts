@@ -9,6 +9,7 @@ import {
   type NotesListResponse,
   type RecordsPageResponse,
 } from "@/types/records";
+import { fetchSafely, readJsonSafely } from "@/lib/api-error";
 
 export type { CandidateNote, CandidateRecord } from "@/types/records";
 
@@ -68,13 +69,13 @@ export async function getCandidates(): Promise<CandidateRecord[]> {
   let page = 1;
 
   while (true) {
-    const response = await fetch(apiUrl(`/records?page=${page}&limit=${PAGE_SIZE}`), {
+    const response = await fetchSafely(apiUrl(`/records?page=${page}&limit=${PAGE_SIZE}`), {
       cache: "no-store",
-    });
+    }, "The candidate directory is temporarily unavailable.");
 
-    if (!response.ok) throw new Error(`Records request failed (${response.status})`);
+    if (!response.ok) throw new Error("The candidate directory could not be loaded.");
 
-    const result: unknown = await response.json();
+    const result: unknown = await readJsonSafely(response, "The candidate directory returned an invalid response.");
     if (!isObject(result) || !Array.isArray(result.data)) {
       throw new Error("Records response has an invalid shape");
     }
@@ -99,14 +100,14 @@ export async function getCandidates(): Promise<CandidateRecord[]> {
 }
 
 export async function getCandidate(id: string): Promise<CandidateRecord | null> {
-  const response = await fetch(apiUrl(`/records/${encodeURIComponent(id)}`), {
+  const response = await fetchSafely(apiUrl(`/records/${encodeURIComponent(id)}`), {
     cache: "no-store",
-  });
+  }, "The candidate service is temporarily unavailable.");
 
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`Candidate request failed (${response.status})`);
+  if (!response.ok) throw new Error("The candidate could not be loaded.");
 
-  const result: unknown = await response.json();
+  const result: unknown = await readJsonSafely(response, "The candidate service returned an invalid response.");
   const candidate = isObject(result) && "data" in result
     ? (result as ApiEnvelope<unknown>).data
     : result;
@@ -115,14 +116,15 @@ export async function getCandidate(id: string): Promise<CandidateRecord | null> 
 }
 
 export async function getCandidateNotes(id: string): Promise<CandidateNote[]> {
-  const response = await fetch(
+  const response = await fetchSafely(
     apiUrl(`/records/${encodeURIComponent(id)}/notes`),
     { cache: "no-store" },
+    "The candidate notes service is temporarily unavailable.",
   );
 
-  if (!response.ok) throw new Error(`Notes request failed (${response.status})`);
+  if (!response.ok) throw new Error("The candidate notes could not be loaded.");
 
-  const result: unknown = await response.json();
+  const result: unknown = await readJsonSafely(response, "The candidate notes returned an invalid response.");
   if (!isObject(result) || !Array.isArray(result.data)) {
     throw new Error("Notes response has an invalid shape");
   }

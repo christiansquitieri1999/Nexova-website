@@ -1,6 +1,7 @@
 import io
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from analyze import (
@@ -9,13 +10,25 @@ from analyze import (
     analyze_text,
     export_metrics,
     format_metrics_csv,
+    main,
 )
 
 
-FIXTURE = Path(__file__).with_name("incidents-nexova.csv")
+FIXTURE = Path(__file__).resolve().parents[1] / "info-nexova" / "incidents-nexova.csv"
 
 
 class IncidentAnalysisTests(unittest.TestCase):
+    def test_missing_file_returns_nonzero_exit_without_raw_exception(self) -> None:
+        missing = Path(__file__).resolve().parent / "missing-incidents.csv"
+
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch("sys.stderr", new=io.StringIO()) as stderr:
+                exit_code = main([str(missing), "--no-export"])
+
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Unable to read the CSV", stderr.getvalue())
+        self.assertNotIn(str(missing), stderr.getvalue())
+
     def test_provided_file_matches_expected_distribution(self) -> None:
         with FIXTURE.open("r", encoding="utf-8", newline="") as source:
             result = analyze_stream(source, FIXTURE.name)

@@ -98,26 +98,35 @@ def _read_ticket_ids() -> set[str]:
     the seed script to TinyDB.
     """
     if TICKET_ID_INDEX_PATH.is_file():
-        raw = TICKET_ID_INDEX_PATH.read_text(encoding="utf-8").strip()
+        try:
+            raw = TICKET_ID_INDEX_PATH.read_text(encoding="utf-8").strip()
+        except (OSError, UnicodeError) as exc:
+            raise RuntimeError("Unable to read the seeded-ticket index.") from exc
         return set(raw.splitlines()) if raw else set()
     return set()
 
 
 def _append_ticket_ids(ticket_ids: list[str]) -> None:
     """Append newly seeded ticket_ids to the index file."""
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    with TICKET_ID_INDEX_PATH.open("a", encoding="utf-8") as fh:
-        for tid in ticket_ids:
-            fh.write(tid + "\n")
+    try:
+        DB_DIR.mkdir(parents=True, exist_ok=True)
+        with TICKET_ID_INDEX_PATH.open("a", encoding="utf-8") as fh:
+            for tid in ticket_ids:
+                fh.write(tid + "\n")
+    except (OSError, UnicodeError) as exc:
+        raise RuntimeError("Unable to update the seeded-ticket index.") from exc
 
 
 def _load_tinydb():
     """Lazy TinyDB import to keep the import fast when only help is needed."""
     from tinydb import TinyDB, Query
 
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    db = TinyDB(DB_PATH)
-    return db, Query()
+    try:
+        DB_DIR.mkdir(parents=True, exist_ok=True)
+        db = TinyDB(DB_PATH)
+        return db, Query()
+    except (OSError, ValueError) as exc:
+        raise RuntimeError("Unable to open the incident database.") from exc
 
 
 def seed() -> int:
@@ -144,8 +153,11 @@ def seed() -> int:
                 return -1
 
             rows = list(reader)
-    except (OSError, UnicodeError) as exc:
-        print(f"[FAIL] Unable to read CSV: {exc}", file=sys.stderr)
+    except (OSError, UnicodeError):
+        print(
+            "[FAIL] Unable to read the incident CSV. Check that it exists and is readable.",
+            file=sys.stderr,
+        )
         return -1
 
     total = len(rows)
@@ -180,7 +192,7 @@ def seed() -> int:
             doc = build_incident_seed_doc(seed_model)
             db_docs.append(doc)
             ticket_ids.append(row["ticket_id"])
-        except Exception:  # noqa: BLE001  — catch Pydantic + ValueError
+        except (TypeError, ValueError):
             model_invalid_count += 1
 
     print(f"[INFO] CSV-valid rows: {len(valid_rows)}  |  "
@@ -188,7 +200,11 @@ def seed() -> int:
           f"Model-invalid: {model_invalid_count}")
 
     # ── 4. Idempotent insert ─────────────────────────────────────────────
-    already_seen = _read_ticket_ids()
+    try:
+        already_seen = _read_ticket_ids()
+    except RuntimeError as exc:
+        print(f"[FAIL] {exc}", file=sys.stderr)
+        return -1
     new_docs: list[dict[str, Any]] = []
     new_ticket_ids: list[str] = []
 
@@ -197,11 +213,10 @@ def seed() -> int:
         if db_docs:
             db, Record = _load_tinydb()
 
-        for doc, tid in zip(db_docs, ticket_ids):
-            if tid in already_seen:
-                continue
+            for doc, tid in zip(db_docs, ticket_ids):
+                if tid in already_seen:
+                    continue
 
-            if db is not None:
                 existing = db.search(
                     (Record.title == doc["title"])
                     & (Record.created_at == doc["created_at"])
@@ -211,23 +226,41 @@ def seed() -> int:
                 if existing:
                     continue
 
-            new_docs.append(doc)
-            new_ticket_ids.append(tid)
+                new_docs.append(doc)
+                new_ticket_ids.append(tid)
+    except RuntimeError as exc:
+        print(f"[FAIL] {exc}", file=sys.stderr)
+        return -1
+    except (OSError, ValueError):
+        print("[FAIL] Unable to search the incident database.", file=sys.stderr)
+        return -1
     finally:
         if db is not None:
-            db.close()
+            try:
+                db.close()
+            except OSError:
+                print("[FAIL] Unable to close the incident database.", file=sys.stderr)
+                return -1
 
     if not new_docs:
         print("[OK] All records already seeded — no new inserts.")
         return 0
 
     # Insert into TinyDB
-    db, _ = _load_tinydb()
-    db.insert_multiple(new_docs)
-    db.close()
+    try:
+        db, _ = _load_tinydb()
+        db.insert_multiple(new_docs)
+        db.close()
+    except (RuntimeError, OSError, ValueError):
+        print("[FAIL] Unable to insert incidents into the database.", file=sys.stderr)
+        return -1
 
     # Persist the ticket_id index
-    _append_ticket_ids(new_ticket_ids)
+    try:
+        _append_ticket_ids(new_ticket_ids)
+    except RuntimeError as exc:
+        print(f"[FAIL] {exc}", file=sys.stderr)
+        return -1
 
     inserted = len(new_docs)
     print(f"[OK] Inserted {inserted} new incident record(s) into the database.")
@@ -265,8 +298,8 @@ def print_detailed_report() -> None:
         with CSV_PATH.open("r", encoding="utf-8-sig", newline="") as fh:
             reader = csv.DictReader(fh)
             rows = list(reader)
-    except (OSError, UnicodeError) as exc:
-        print(f"  Cannot read CSV for report: {exc}")
+    except (OSError, UnicodeError):
+        print("  Cannot read the incident CSV for the report.")
         return
 
     from csv_validator import validate_csv_row
@@ -337,7 +370,7 @@ def print_detailed_report() -> None:
             seed_data = _transform_row(clean)
             _ = IncidentSeed.model_validate(seed_data)
             model_ok += 1
-        except Exception:
+        except (TypeError, ValueError):
             model_fail += 1
 
     already_seen = _read_ticket_ids()
