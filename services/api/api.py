@@ -138,6 +138,24 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
+
+    # ---- Unhandled exception guard ----
+
+    def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
+        """Run the named method and catch any unhandled exception.
+
+        Never exposes stack traces to the client. The full traceback is
+        printed to stderr for server-side debugging.
+        """
+        try:
+            getattr(self, method_name)(*args, **kwargs)
+        except Exception:
+            traceback.print_exc()
+            self._send_json(
+                500,
+                {"error": "An unexpected error occurred. Please try again later."},
+            )
+
     def do_OPTIONS(self) -> None:
         if not self._is_origin_allowed():
             self._send_html(
@@ -147,6 +165,9 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
         self._send_json(204, {})
 
     def do_GET(self) -> None:
+        self._safe_dispatch("_handle_get")
+
+    def _handle_get(self) -> None:
         if not self._is_origin_allowed():
             self._send_html(
                 403, "Origin not allowed", "This origin is not allowed to use the API."
@@ -194,6 +215,9 @@ class IncidentApiHandler(BaseHTTPRequestHandler):
         )
 
     def do_POST(self) -> None:
+        self._safe_dispatch("_handle_post")
+
+    def _handle_post(self) -> None:
         if not self._is_origin_allowed():
             self._send_html(
                 403, "Origin not allowed", "This origin is not allowed to use the API."

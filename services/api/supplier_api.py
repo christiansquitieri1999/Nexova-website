@@ -18,8 +18,10 @@ from __future__ import annotations
 
 import json
 import re
+import traceback
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any
+from urllib.parse import urlparse, parse_qs
 
 from pydantic import ValidationError
 
@@ -140,9 +142,30 @@ class SupplierHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
 
+    # ---- Unhandled exception guard ----
+
+    def _safe_dispatch(self, method_name: str, *args: Any, **kwargs: Any) -> None:
+        """Run the named method and catch any unhandled exception.
+
+        Never exposes stack traces to the client. The full traceback is
+        printed to stderr for server-side debugging.
+        """
+        try:
+            getattr(self, method_name)(*args, **kwargs)
+        except Exception:
+            traceback.print_exc()
+            error_response(
+                self,
+                500,
+                "An unexpected error occurred. Please try again later.",
+            )
+
     # ---- GET ----
 
     def do_GET(self) -> None:
+        self._safe_dispatch("_do_get")
+
+    def _do_get(self) -> None:
         path = self.path.split("?")[0]
         m = _PATH_RE_SUPPLIERS.match(path)
         if m:
@@ -153,8 +176,10 @@ class SupplierHandler(BaseHTTPRequestHandler):
         error_response(self, 404, "Not found")
 
     # ---- POST ----
-
     def do_POST(self) -> None:
+        self._safe_dispatch("_do_post")
+
+    def _do_post(self) -> None:
         path = self.path
         m = _PATH_RE_SUPPLIERS.match(path)
         if m:
@@ -162,8 +187,10 @@ class SupplierHandler(BaseHTTPRequestHandler):
         error_response(self, 404, "Not found")
 
     # ---- PATCH ----
-
     def do_PATCH(self) -> None:
+        self._safe_dispatch("_do_patch")
+
+    def _do_patch(self) -> None:
         path = self.path
         m = _PATH_RE_RATE.match(path)
         if m:
@@ -174,8 +201,10 @@ class SupplierHandler(BaseHTTPRequestHandler):
         error_response(self, 404, "Not found")
 
     # ---- DELETE ----
-
     def do_DELETE(self) -> None:
+        self._safe_dispatch("_do_delete")
+
+    def _do_delete(self) -> None:
         path = self.path
         m = _PATH_RE_SUPPLIER_ID.match(path)
         if m:
@@ -185,15 +214,15 @@ class SupplierHandler(BaseHTTPRequestHandler):
     # ---- Internal handlers ----
 
     def _list_suppliers(self) -> None:
-        from urllib.parse import urlparse, parse_qs
-
+        caller_id = self._check_auth()
+        if caller_id is None:
+            return
         parsed = urlparse(self.path)
         params = parse_qs(parsed.query)
         country = params.get("country", [None])[0]
         category = params.get("category", [None])[0]
         suppliers = self.store.filter(country=country, category=category)
         json_response(self, 200, [s.model_dump() for s in suppliers])
-
     def _get_supplier(self, supplier_id: str) -> None:
         caller_id = self._check_auth()
         if caller_id is None:
