@@ -1,4 +1,5 @@
 """Register a test user and get a token."""
+import sys
 import urllib.request, json
 
 base = "http://127.0.0.1:8002"
@@ -12,6 +13,7 @@ try:
 except urllib.error.HTTPError as e:
     body = e.read().decode()
     print(f"Register: {e.code} — {body[:150]}")
+    sys.exit(1)
 
 # 2. Login
 payload2 = json.dumps({"email": "admin@nexova.com", "password": "admin123"}).encode()
@@ -20,10 +22,15 @@ try:
     r2 = urllib.request.urlopen(req2, timeout=5)
     data = json.loads(r2.read())
     token = data["access_token"]
-    print(f"\nLogin OK. Token (first 60 chars): {token[:60]}...")
-    # Save token to a file for the browser
+    # Show only masked snippet to avoid leaking the full token to stdout
+    if len(token) > 8:
+        print(f"\nLogin OK. Token: {token[:4]}...{token[-4:]}")
+    else:
+        print("\nLogin OK. Token received (too short to mask).")
+    # Save full token to a file for the browser
     with open("nexova_token.txt", "w") as f:
         f.write(token)
     print("Token saved to nexova_token.txt")
 except urllib.error.HTTPError as e:
     print(f"Login error: {e.code} — {e.read().decode()[:200]}")
+    sys.exit(1)
